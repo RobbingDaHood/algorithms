@@ -23,151 +23,96 @@ public class TableSoccerTournamentTest {
 
     @org.junit.Test
     public void getNextGame8() throws Exception {
-        testNonStop(8, true);
+        testNonStop(8);
     }
 
     @org.junit.Test
     public void getNextGame16() throws Exception {
-        testNonStop(16, true);
+        testNonStop(16);
     }
 
     @org.junit.Test
     public void getNextGame23() throws Exception {
-        testNonStop(23, true);
+        testNonStop(23);
     }
 
     @org.junit.Test
     public void getNextGame5() throws Exception {
-        testNonStop(5, true);
+        testNonStop(5);
     }
 
     @org.junit.Test
     public void getNextGame6() throws Exception {
-        testNonStop(6, true);
+        testNonStop(6);
     }
 
     @org.junit.Test
     public void getNextGameNonDummy() throws Exception {
         for (int i = 4; i < 10; i++) {
-            testNonStop(Math.pow(2, i), true);
+            testNonStop(Math.pow(2, i));
         }
     }
 
     @org.junit.Test
     public void getNextGame() throws Exception {
         for (int i = 4; i < 100; i++) {
-            testNonStop(i, true);
-//            System.out.println("Doing: " + i);
+            testNonStop(i);
         }
     }
 
     //This test wont stop before alle games have been executed
-    private void testNonStop(double amount, boolean withoutDummy) {
+    private void testNonStop(double amount) {
         ArrayList<Person> players = generatePersons(amount);
         Map<Person, List<Person>> pairsPlayed = new HashMap<>();
-        int numberOfDummies = 0;
-        int gamesTotal = 0;
-        List<Game> gameList = new LinkedList<>();
 
         TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
 
         //A safer version of while(true)
         for (int i = 0; i < amount; i++) {
-
             while (tableSoccerTournament.isRingsHaveMorePairs()) {
-//            System.out.println("Doing: " + amount + " Generating: " + i);
-                tableSoccerTournament.generateNextGameList(false);
+                tableSoccerTournament.generateNextGameRow();
                 List<Game> newGamesList = tableSoccerTournament.getGameList();
-
-//            System.out.println("Doing: " + amount + " Validating: " + i);
 
                 if (newGamesList.size() == 0) {
                     break;
                 }
 
                 for (Game game : newGamesList) {
-                    if (withoutDummy) {
-                        addTeam(pairsPlayed, game.getTeamOne().getPersonOne(), game.getTeamOne().getPersonTwo());
-                        addTeam(pairsPlayed, game.getTeamTwo().getPersonOne(), game.getTeamTwo().getPersonTwo());
-                    } else {
-                        Person personOneTeamOne = game.getTeamOne().getPersonOne();
-                        Person personTwoTeamOne = game.getTeamOne().getPersonTwo();
-                        Person personOneTeamTwo = game.getTeamTwo().getPersonOne();
-                        Person personTwoTeamTwo = game.getTeamTwo().getPersonTwo();
-
-                        if (game.getDummyPersons().contains(personOneTeamOne)) {
-                            personOneTeamOne = new Person("DUMMY");
-                            System.out.println("DUMMY");
-                            numberOfDummies++;
-                        }
-                        if (game.getDummyPersons().contains(personTwoTeamOne)) {
-                            personTwoTeamOne = new Person("DUMMY");
-                            System.out.println("DUMMY");
-                            numberOfDummies++;
-                        }
-                        if (game.getDummyPersons().contains(personOneTeamTwo)) {
-                            personOneTeamTwo = new Person("DUMMY");
-                            System.out.println("DUMMY");
-                            numberOfDummies++;
-                        }
-                        if (game.getDummyPersons().contains(personTwoTeamTwo)) {
-                            personTwoTeamTwo = new Person("DUMMY");
-                            System.out.println("DUMMY");
-                            numberOfDummies++;
-                        }
-
-                        addTeam(pairsPlayed, personOneTeamOne, personTwoTeamOne);
-                        addTeam(pairsPlayed, personOneTeamTwo, personTwoTeamTwo);
-                    }
-                    gamesTotal++;
+                    addTeam(pairsPlayed, game.getTeamOne().getPersonOne(), game.getTeamOne().getPersonTwo());
+                    addTeam(pairsPlayed, game.getTeamTwo().getPersonOne(), game.getTeamTwo().getPersonTwo());
                 }
-
-                gameList.addAll(newGamesList);
-                validateParisWithoutDummyPlayers(pairsPlayed, withoutDummy);
             }
         }
 
-        System.out.println("Did: " + amount + " Games total: " + gamesTotal + " Dummies: " + numberOfDummies);
+        validateTtalTournament(pairsPlayed);
     }
 
-    private void validateParisWithoutDummyPlayers(Map<Person, List<Person>> pairsPlayed, boolean withoutDummy) {
-        Integer gamesPlayed = null;
-        for (Person person : pairsPlayed.keySet()) {
-            if (!person.getName().equals("DUMMY")) {
-                List<Person> partners = pairsPlayed.get(person);
+    private void validateTtalTournament(Map<Person, List<Person>> pairsPlayed) {
+        Set<Person> persons = pairsPlayed.keySet();
+        for (Person person : persons) {
+            List<Person> partners = pairsPlayed.get(person);
 
-                //Every player played the same amount of games
-                if (gamesPlayed == null) {
-                    gamesPlayed = partners.size();
-                } else {
-                    if (!(gamesPlayed.intValue() == partners.size() ||
-                            gamesPlayed.intValue() + 1 == partners.size() ||
-                            gamesPlayed.intValue() == partners.size() + 1)) {
+            int countPlayersPlayedOneLess = 0;
+            int i = persons.size() - partners.size();
+            if (i == 2) {
+                //Sometimes the last pair does not have a partner, then up to two players can have played #Persons - 2
+                //pairs.
+                countPlayersPlayedOneLess++;
+                Assert.assertTrue(countPlayersPlayedOneLess < 3);
+            } else {
+                //Max amount of pairs a player can be in is #Persons - 1
+                Assert.assertTrue(i == 1);
+            }
 
-                        //TODO: TEst 6 fejler her fordi det sidste par mangler en dummy kamp.
-                        Assert.assertTrue(gamesPlayed.intValue() == partners.size() ||
-                                gamesPlayed.intValue() + 1 == partners.size() ||
-                                gamesPlayed.intValue() == partners.size() + 1);
+            //No two same partners
+            for (Person partner : partners) {
+                int count = 0;
+                for (Person partner1 : partners) {
+                    if (partner == partner1) {
+                        count++;
                     }
-                }
 
-                //No two same partners
-                for (Person partner : partners) {
-                    int count = 0;
-
-                    if (!partner.getName().equals("DUMMY")) {
-                        for (Person partner1 : partners) {
-                            if (partner == partner1) {
-                                count++;
-                            }
-
-                            if (count > 1) {
-                                System.out.println("FAILED!");
-                            }
-
-                            Assert.assertFalse(count > 1);
-                        }
-                    }
+                    Assert.assertFalse(count > 1);
                 }
             }
         }

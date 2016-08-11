@@ -15,9 +15,6 @@ import java.util.*;
 public class TableSoccerTournament {
     private List<DoubleRing> rings;
     private List<Game> gameList;
-    private Iterator<Game> gameIterator;
-    private boolean anyPlayersLeft;
-    private ArrayList<Person> players;
     private boolean ringsHaveMorePairs = true;
     private Queue<Pair> nextPairRow = new LinkedList<>();
 
@@ -25,22 +22,18 @@ public class TableSoccerTournament {
         DoubleRing doubleRing = new DoubleRing(players);
         this.rings = new LinkedList<>();
         rings.add(doubleRing);
-        Iterator<Game> gameIterator = new LinkedList<Game>().iterator();
-        this.players = players;
     }
 
     public boolean isRingsHaveMorePairs() {
         return ringsHaveMorePairs;
     }
 
-    public void generateNextGameList(boolean lastGameList) {
+    public void generateNextGameRow() {
         gameList = new LinkedList<>();
         List<DoubleRing> newRings = new LinkedList<>();
 
         ringsHaveMorePairs = false;
         for (DoubleRing ring : rings) {
-
-//            if (ring.maxSize() > 1) {
             if (ring.minSize() > 0 && ring.haveAnyPairsLeft()) { //TODO remove ring.haveAnyPairsLeft()
                 Queue<Pair> nextPairRow1 = ring.getNextPairRow();
                 this.nextPairRow.addAll(nextPairRow1);
@@ -49,16 +42,6 @@ public class TableSoccerTournament {
             if (!ringsHaveMorePairs) {
                 ringsHaveMorePairs = ring.haveAnyPairsLeft();
             }
-//            } else {
-//                nextPairRow.add(ring.createDummyPair(players));
-//            }
-
-//            //TODO remove nextPairRow.size() == 0
-//            if ((lastGameList || nextPairRow.size() == 0) && ring.anyPlayersLeft()) {
-//                gameList.add(ring.createDummyGame(players));
-//            } else {
-//                newRings.addAll(ring.split());
-//            }
         }
 
         if (!ringsHaveMorePairs) {
