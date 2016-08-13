@@ -27,22 +27,27 @@ public class DoubleRing {
         Assert.assertTrue(ringOne.size() >= ringTwo.size());
     }
 
-    public Queue<Pair> getNextPairRow() {
+    public Queue<Pair> getNextCycle() {
         Queue<Pair> pairs = new LinkedList<>();
 
-        Assert.assertTrue(index < ringOne.size());
-        for (int i = 0; i < ringTwo.size(); i++) { //Last player in the big ring should not be paired
-            pairs.add(new Pair(ringOne.get((i + index) % ringOne.size()), ringTwo.get(i)));
+        if (index < ringOne.size()) { //Else we already did one full Cycle
+            for (int i = 0; i < ringTwo.size(); i++) { //Last player in the big ring should not be paired
+                pairs.add(new Pair(ringOne.get((i + index) % ringOne.size()), ringTwo.get(i)));
+            }
+            index++;
         }
-        index++;
 
         return pairs;
     }
 
     public List<DoubleRing> split() {
         LinkedList<DoubleRing> doubleRings = new LinkedList<>();
-        doubleRings.add(new DoubleRing(ringOne));
-        doubleRings.add(new DoubleRing(ringTwo));
+
+        if (ringOne.size() > 0 && ringTwo.size() != 0)
+            doubleRings.add(new DoubleRing(ringOne));
+        if (ringTwo.size() > 0 && ringOne.size() != 0)
+            doubleRings.add(new DoubleRing(ringTwo));
+
         return doubleRings;
     }
 

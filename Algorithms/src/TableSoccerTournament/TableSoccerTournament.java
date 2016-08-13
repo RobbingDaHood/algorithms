@@ -14,7 +14,6 @@ import java.util.*;
  */
 public class TableSoccerTournament {
     private List<DoubleRing> rings;
-    private List<Game> gameList;
     private boolean ringsHaveMorePairs = true;
     private Queue<Pair> nextPairRow = new LinkedList<>();
 
@@ -24,42 +23,62 @@ public class TableSoccerTournament {
         rings.add(doubleRing);
     }
 
-    public boolean isRingsHaveMorePairs() {
-        return ringsHaveMorePairs;
+
+    public Queue<Pair> generateTournament() {
+        while (ringsHaveMorePairs) {
+            generateNextRow();
+        }
+
+        return nextPairRow;
     }
 
-    public void generateNextGameRow() {
-        gameList = new LinkedList<>();
-        List<DoubleRing> newRings = new LinkedList<>();
+    public Queue<Pair> generateNextRow() {
+        while (ringsHaveMorePairs) { //TODO could probably be replaced with a for loop on the max length of the biggest innter ring.
+            generateNextCycle();
+        }
 
+        generateNewRings();
+
+        return nextPairRow;
+    }
+
+    public Queue<Pair> generateNextCycle() {
         ringsHaveMorePairs = false;
         for (DoubleRing ring : rings) {
-            if (ring.minSize() > 0 && ring.haveAnyPairsLeft()) { //TODO remove ring.haveAnyPairsLeft()
-                Queue<Pair> nextPairRow1 = ring.getNextPairRow();
-                this.nextPairRow.addAll(nextPairRow1);
-            }
+            this.nextPairRow.addAll(ring.getNextCycle());
 
             if (!ringsHaveMorePairs) {
                 ringsHaveMorePairs = ring.haveAnyPairsLeft();
             }
         }
 
+        return nextPairRow;
+    }
+
+    public boolean isRingsHaveMorePairs() {
+        return ringsHaveMorePairs;
+    }
+
+
+    public List<Game> generateGameList(Queue<Pair> tournamentOfPairs) {
+        List<Game> gameList = new LinkedList<>();
+        while (tournamentOfPairs.size() > 1) {
+            gameList.add(new Game(tournamentOfPairs.poll(), tournamentOfPairs.poll()));
+        }
+        return gameList;
+    }
+
+    public void generateNewRings() {
+        List<DoubleRing> newRings = new LinkedList<>();
+
         if (!ringsHaveMorePairs) {
+
             for (DoubleRing ring : rings) {
                 newRings.addAll(ring.split());
             }
 
             rings = newRings;
-            ringsHaveMorePairs = true;
+            ringsHaveMorePairs = newRings.size() > 0;
         }
-
-        while (nextPairRow.size() > 1) {
-            gameList.add(new Game(nextPairRow.poll(), nextPairRow.poll()));
-        }
-
-    }
-
-    public List<Game> getGameList() {
-        return gameList;
     }
 }

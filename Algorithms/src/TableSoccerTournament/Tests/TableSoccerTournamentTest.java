@@ -1,6 +1,7 @@
 package TableSoccerTournament.Tests;
 
 import TableSoccerTournament.Models.Game;
+import TableSoccerTournament.Models.Pair;
 import TableSoccerTournament.Models.Person;
 import TableSoccerTournament.TableSoccerTournament;
 import org.junit.Assert;
@@ -22,77 +23,159 @@ public class TableSoccerTournamentTest {
     }
 
     @org.junit.Test
-    public void getNextGame8() throws Exception {
-        testNonStop(8);
+    public void getNextGameTotalTournament8() throws Exception {
+        testGenerateCycleRowTournament(8);
     }
 
     @org.junit.Test
-    public void getNextGame16() throws Exception {
-        testNonStop(16);
+    public void getNextGameTotalTournament16() throws Exception {
+        testGenerateCycleRowTournament(16);
     }
 
     @org.junit.Test
-    public void getNextGame23() throws Exception {
-        testNonStop(23);
+    public void getNextGameTotalTournament23() throws Exception {
+        testGenerateCycleRowTournament(23);
     }
 
     @org.junit.Test
-    public void getNextGame5() throws Exception {
-        testNonStop(5);
+    public void getNextGameTotalTournament5() throws Exception {
+        testGenerateCycleRowTournament(5);
     }
 
     @org.junit.Test
-    public void getNextGame6() throws Exception {
-        testNonStop(6);
+    public void getNextGameTotalTournament6() throws Exception {
+        testGenerateCycleRowTournament(6);
     }
 
     @org.junit.Test
-    public void getNextGameNonDummy() throws Exception {
+    public void getNextGameEveryPairRow17() throws Exception {
+        testGenerateCycleRowTournament(17);
+    }
+
+    @org.junit.Test
+    public void getNextGameEveryPairRow33() throws Exception {
+        testGenerateCycleRowTournament(33);
+    }
+
+    @org.junit.Test
+    public void getNextGameEveryPairRow65() throws Exception {
+        testGenerateCycleRowTournament(65);
+    }
+
+
+    @org.junit.Test
+    public void getNextGameEveryPairRow97() throws Exception {
+        testGenerateCycleRowTournament(97);
+    }
+
+
+    @org.junit.Test
+    public void getNextGameEveryPairRow98() throws Exception {
+        testGenerateCycleRowTournament(98);
+    }
+
+
+    @org.junit.Test
+    public void getNextGameEveryPairRow99() throws Exception {
+        testGenerateCycleRowTournament(99);
+    }
+
+
+    @org.junit.Test
+    public void getNextGameEveryPairRow5() throws Exception {
+        testGenerateCycleRowTournament(5);
+    }
+
+    @org.junit.Test
+    public void getNextGameTotalTournamentSimple() throws Exception {
         for (int i = 4; i < 10; i++) {
-            testNonStop(Math.pow(2, i));
+            testGenerateCycleRowTournament(Math.pow(2, i));
         }
     }
 
     @org.junit.Test
-    public void getNextGame() throws Exception {
+    public void getNextGameTotalTournamentTotal() throws Exception {
         for (int i = 4; i < 100; i++) {
-            testNonStop(i);
+            testGenerateCycleRowTournament(i);
         }
     }
 
-    //This test wont stop before alle games have been executed
-    private void testNonStop(double amount) {
+    //This test wont stop before all games have been executed
+    private void testGenerateCycleRowTournament(double amount) {
         ArrayList<Person> players = generatePersons(amount);
         Map<Person, List<Person>> pairsPlayed = new HashMap<>();
+        LinkedList<Pair> allPairs = new LinkedList<>();
 
         TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
 
-        //A safer version of while(true)
-        for (int i = 0; i < amount; i++) {
+        //Generate all rows
+        while (tableSoccerTournament.isRingsHaveMorePairs()) {
+            //Generate all cycles for this row
             while (tableSoccerTournament.isRingsHaveMorePairs()) {
-                tableSoccerTournament.generateNextGameRow();
-                List<Game> newGamesList = tableSoccerTournament.getGameList();
+                Queue<Pair> newGamesList = tableSoccerTournament.generateNextCycle();
 
-                if (newGamesList.size() == 0) {
-                    break;
+                //Handle pairs
+                while (!newGamesList.isEmpty()) {
+                    Pair pair = newGamesList.poll();
+                    allPairs.add(pair);
+                    addTeam(pairsPlayed, pair.getPersonOne(), pair.getPersonTwo());
                 }
 
-                for (Game game : newGamesList) {
-                    addTeam(pairsPlayed, game.getTeamOne().getPersonOne(), game.getTeamOne().getPersonTwo());
-                    addTeam(pairsPlayed, game.getTeamTwo().getPersonOne(), game.getTeamTwo().getPersonTwo());
-                }
+                validateCycle(pairsPlayed);
             }
+
+            validateRow(pairsPlayed);
+            tableSoccerTournament.generateNewRings();
         }
 
-        validateTtalTournament(pairsPlayed);
+        validateTotalTournament(pairsPlayed);
+
+//        System.out.println("Amount of players: " + amount + " resulted in " + tableSoccerTournament.generateGameList(allPairs).size() + " Games.");
     }
 
-    private void validateTtalTournament(Map<Person, List<Person>> pairsPlayed) {
+    private void validateRow(Map<Person, List<Person>> pairsPlayed) {
         Set<Person> persons = pairsPlayed.keySet();
+
+        int firstSizeEncountered = 0;
+
         for (Person person : persons) {
             List<Person> partners = pairsPlayed.get(person);
 
-            int countPlayersPlayedOneLess = 0;
+            if (firstSizeEncountered == 0) {
+                firstSizeEncountered = partners.size();
+            } else {
+                int distanceFromFirstEncounter = firstSizeEncountered - partners.size();
+                Assert.assertFalse("Max amount of pairs a player can be in is #Persons - 1, but were: " + distanceFromFirstEncounter, distanceFromFirstEncounter < -1);
+                Assert.assertFalse("Max amount of pairs a player can be in is #Persons - 1, but were: " + distanceFromFirstEncounter, distanceFromFirstEncounter > 1);
+            }
+        }
+    }
+
+
+    private void validateCycle(Map<Person, List<Person>> pairsPlayed) {
+        Set<Person> persons = pairsPlayed.keySet();
+
+        int firstSizeEncountered = 0;
+
+        for (Person person : persons) {
+            List<Person> partners = pairsPlayed.get(person);
+
+            if (firstSizeEncountered == 0) {
+                firstSizeEncountered = partners.size();
+            } else {
+                int distanceFromFirstEncounter = firstSizeEncountered - partners.size();
+                Assert.assertFalse("Max amount of pairs a player can be in is #Persons - 1, but were: " + distanceFromFirstEncounter, distanceFromFirstEncounter < -2);
+                Assert.assertFalse("Max amount of pairs a player can be in is #Persons - 1, but were: " + distanceFromFirstEncounter, distanceFromFirstEncounter > 2);
+            }
+        }
+    }
+
+    private void validateTotalTournament(Map<Person, List<Person>> pairsPlayed) {
+        Set<Person> persons = pairsPlayed.keySet();
+        int countPlayersPlayedOneLess = 0;
+        for (Person person : persons) {
+            List<Person> partners = pairsPlayed.get(person);
+
             int i = persons.size() - partners.size();
             if (i == 2) {
                 //Sometimes the last pair does not have a partner, then up to two players can have played #Persons - 2
