@@ -19,6 +19,7 @@ public class DoubleRing {
         return index < maxSize();
     }
 
+    //Ring one is always the bigger ring.
     public DoubleRing(ArrayList<Person> players) {
         this.ringTwo = new ArrayList<>(players.subList(0, players.size() / 2));
         this.ringOne = new ArrayList<>(players.subList(players.size() / 2, players.size()));
@@ -43,12 +44,54 @@ public class DoubleRing {
     public List<DoubleRing> split() {
         LinkedList<DoubleRing> doubleRings = new LinkedList<>();
 
-        if (ringOne.size() > 0 && ringTwo.size() != 0)
+        //The biggest ring will produce one more pair row if it is uneven.
+        //If the biggest ring is the first ring, then there is a risk that the players
+        //In the ring will play two games very close to each other.
+
+        if (ringOne.size() > ringTwo.size() && ringOne.size() > 2) { //Then ring one last pair came from index = n - 2
+            ArrayList<Person> firstPart = new ArrayList<>(ringOne.subList(0, ringOne.size() / 2));
+            ArrayList<Person> lastPart = new ArrayList<>(ringOne.subList(ringOne.size() / 2, ringOne.size() - 2));
+            ArrayList<Person> middlePart = new ArrayList<>(ringOne.subList(ringOne.size() - 2, ringOne.size()));
+            firstPart.addAll(middlePart);
+            firstPart.addAll(lastPart);
+
+            doubleRings.add(new DoubleRing(firstPart));
+        } else if (ringOne.size() > 2) {
+            ArrayList<Person> firstPart = new ArrayList<>(ringOne.subList(0, ringOne.size() / 2));
+            ArrayList<Person> lastPart = new ArrayList<>(ringOne.subList(ringOne.size() / 2, ringOne.size() - 1));
+            ArrayList<Person> middlePart = new ArrayList<>(ringOne.subList(ringOne.size() - 1, ringOne.size()));
+            firstPart.addAll(middlePart);
+            firstPart.addAll(lastPart);
+
+            doubleRings.add(new DoubleRing(firstPart));
+        } else if (ringOne.size() > 1) //Else no pairs can be produced
             doubleRings.add(new DoubleRing(ringOne));
-        if (ringTwo.size() > 0 && ringOne.size() != 0)
+
+        if (ringTwo.size() > 1) //Else no pairs can be produced
             doubleRings.add(new DoubleRing(ringTwo));
 
         return doubleRings;
+
+
+//        if (ringTwo.size() > 1) //Else no pairs can be produced
+//            doubleRings.add(new DoubleRing(ringTwo));
+//
+//        ArrayList<Person> firstPart = new ArrayList<>(ringOne.subList(0, ringOne.size() / 2));
+//        ArrayList<Person> lastPart = new ArrayList<>(ringOne.subList(ringOne.size() / 2, ringOne.size() - 2));
+//        ArrayList<Person> middlePart = new ArrayList<>(ringOne.subList(ringOne.size() - 2, ringOne.size()));
+//        firstPart.addAll(middlePart);
+//        firstPart.addAll(lastPart);
+//
+//        doubleRings.add(new DoubleRing(firstPart));
+//    } else {
+//        if (ringOne.size() > 1) //Else no pairs can be produced
+//            doubleRings.add(new DoubleRing(ringOne));
+//
+//        if (ringTwo.size() > 1) //Else no pairs can be produced
+//            doubleRings.add(new DoubleRing(ringTwo));
+//    }
+//
+//        return doubleRings;
     }
 
     public int maxSize() {
@@ -57,5 +100,9 @@ public class DoubleRing {
 
     public int minSize() {
         return Math.min(ringOne.size(), ringTwo.size());
+    }
+
+    public String toString() {
+        return ringOne.toString() + ringTwo.toString();
     }
 }

@@ -77,8 +77,34 @@ public class TableSoccerTournament {
                 newRings.addAll(ring.split());
             }
 
+
+            if (newRings.size() > 2) {
+                ArrayList<Integer> indexesOfUneven = new ArrayList<>();
+
+                for (int i = 0; i < newRings.size(); i++) {
+                    DoubleRing ring = newRings.get(i);
+                    if (ring.maxSize() != ring.minSize()) {
+                        indexesOfUneven.add(i);
+                    }
+                }
+
+                for (int i = 0; i < indexesOfUneven.size(); i++) {
+                    Integer indexOfUneven = indexesOfUneven.get(i);
+
+                    if(i+1 < indexesOfUneven.size()) {
+                        Collections.swap(newRings, indexOfUneven, indexesOfUneven.get(i+1) - 1);
+                    } else {
+                        Collections.swap(newRings, indexOfUneven, newRings.size() - 2);
+                    }
+                }
+            }
+
             rings = newRings;
             ringsHaveMorePairs = newRings.size() > 0;
         }
+    }
+
+    public List<DoubleRing> getRings() {
+        return rings;
     }
 }
