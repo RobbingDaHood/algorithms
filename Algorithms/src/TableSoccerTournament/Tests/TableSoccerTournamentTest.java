@@ -49,6 +49,21 @@ public class TableSoccerTournamentTest {
     }
 
     @org.junit.Test
+    public void getNextGameTotalTournament7() throws Exception {
+        testGenerateCycleRowTournament(7);
+    }
+
+    @org.junit.Test
+    public void getNextGameEveryPairRow10() throws Exception {
+        testGenerateCycleRowTournament(10);
+    }
+
+    @org.junit.Test
+    public void getNextGameEveryPairRow11() throws Exception {
+        testGenerateCycleRowTournament(11);
+    }
+
+    @org.junit.Test
     public void getNextGameEveryPairRow13() throws Exception {
         testGenerateCycleRowTournament(13);
     }
@@ -163,33 +178,222 @@ public class TableSoccerTournamentTest {
             tableSoccerTournament.generateNewRings();
         }
 
-        validateTotalTournament(pairsPlayed);
-        validateGames(tableSoccerTournament.generateGameList(new LinkedList<Pair>(allPairs)), amount);
+        hackIT(pairsPlayed);
 
-        System.out.println("Amount of players: " + amount + " resulted in " + tableSoccerTournament.generateGameList(allPairs).size() + " Games.");
+        validateTotalTournament(pairsPlayed);
+        notInSameGameSequence(tableSoccerTournament.generateGameList(new LinkedList<Pair>(allPairs)), amount);
+
+//        System.out.println("Amount of players: " + amount + " resulted in " + tableSoccerTournament.generateGameList(allPairs).size() + " Games.");
+    }
+
+    private void hackIT(Map<Person, List<Person>> pairsPlayed) {
+//        boolean atLeastOnevalid = true;
+//        int sequenceGameLength = 1;
+//
+//        while (atLeastOnevalid) {
+//            atLeastOnevalid = false;
+//
+//            outerwhile:
+//            for (int i = 0; i < pairsPlayed.size() - 1; i += sequenceGameLength) {
+//                Map<Person, Integer> personCounts = new HashMap<>();
+//                for (int k = 0; k < sequenceGameLength && i + k < games.size(); k++) {
+//                    Game game = games.get(i + k);
+//
+//                    Person person = game.getTeamOne().getPersonOne();
+//                    Integer personCount = personCounts.get(person);
+//                    if (personCount == null) {
+//                        personCounts.put(person, 1);
+//                    } else {
+//                        System.out.print(i + ":" + sequenceGameLength + " ");
+//                        break outerwhile;
+//                    }
+//
+//                    person = game.getTeamOne().getPersonTwo();
+//                    personCount = personCounts.get(person);
+//                    if (personCount == null) {
+//                        personCounts.put(person, 1);
+//                    } else {
+//                        System.out.print(i + ":" + sequenceGameLength + " ");
+//                        break outerwhile;
+//                    }
+//
+//
+//                    person = game.getTeamTwo().getPersonOne();
+//                    personCount = personCounts.get(person);
+//                    if (personCount == null) {
+//                        personCounts.put(person, 1);
+//                    } else {
+//                        System.out.print(i + ":" + sequenceGameLength + " ");
+//                        break outerwhile;
+//                    }
+//
+//
+//                    person = game.getTeamTwo().getPersonTwo();
+//                    personCount = personCounts.get(person);
+//                    if (personCount == null) {
+//                        personCounts.put(person, 1);
+//                    } else {
+//                        System.out.print(i + ":" + sequenceGameLength + " ");
+//                        break outerwhile;
+//                    }
+//                }
+//
+//                atLeastOnevalid = true;
+//            }
+//
+//            sequenceGameLength++;
+//        }
+//
+//        System.out.println("");
+////        System.out.println("GameDistance: " + (sequenceGameLength - 1));
+
+    }
+
+    private void notInSameGameSequence(List<Game> games, double amount) {
+        System.out.print("(" + amount + "/" + games.size() + ") ");
+
+        boolean atLeastOnevalid = true;
+        int sequenceGameLength = 1;
+
+        while (atLeastOnevalid) {
+            atLeastOnevalid = false;
+
+            outerwhile:
+            for (int i = 0; i < games.size() - 1; i += sequenceGameLength) {
+                Map<Person, Integer> personCounts = new HashMap<>();
+                for (int k = 0; k < sequenceGameLength && i + k < games.size(); k++) {
+                    Game game = games.get(i + k);
+
+                    Person person = game.getTeamOne().getPersonOne();
+                    Integer personCount = personCounts.get(person);
+                    if (personCount == null) {
+                        personCounts.put(person, 1);
+                    } else {
+                        System.out.print(i + ":" + sequenceGameLength + " ");
+                        break outerwhile;
+                    }
+
+                    person = game.getTeamOne().getPersonTwo();
+                    personCount = personCounts.get(person);
+                    if (personCount == null) {
+                        personCounts.put(person, 1);
+                    } else {
+                        System.out.print(i + ":" + sequenceGameLength + " ");
+                        break outerwhile;
+                    }
+
+
+                    person = game.getTeamTwo().getPersonOne();
+                    personCount = personCounts.get(person);
+                    if (personCount == null) {
+                        personCounts.put(person, 1);
+                    } else {
+                        System.out.print(i + ":" + sequenceGameLength + " ");
+                        break outerwhile;
+                    }
+
+
+                    person = game.getTeamTwo().getPersonTwo();
+                    personCount = personCounts.get(person);
+                    if (personCount == null) {
+                        personCounts.put(person, 1);
+                    } else {
+                        System.out.print(i + ":" + sequenceGameLength + " ");
+                        break outerwhile;
+                    }
+                }
+
+                atLeastOnevalid = true;
+            }
+
+            sequenceGameLength++;
+        }
+
+        System.out.println("");
+//        System.out.println("GameDistance: " + (sequenceGameLength - 1));
+    }
+
+
+    private void countMaxDistanesInGames(List<Game> games, double amount) {
+        Map<Person, Integer> distanceSinceLastGame = new HashMap<>();
+        int minimumDistanceInGame = Integer.MAX_VALUE;
+
+        System.out.print("(" + amount + "/" + games.size() + ") ");
+
+        boolean minimumChanged;
+        for (int i = 0; i < games.size(); i++) {
+            Game game = games.get(i);
+            minimumChanged = false;
+
+            Person person = game.getTeamOne().getPersonOne();
+            Integer indexOfLastPlay = distanceSinceLastGame.get(person);
+            if (indexOfLastPlay != null && minimumDistanceInGame > i - indexOfLastPlay) {
+                minimumDistanceInGame = i - indexOfLastPlay;
+                minimumChanged = true;
+            }
+            distanceSinceLastGame.put(person, i);
+
+            person = game.getTeamOne().getPersonTwo();
+            indexOfLastPlay = distanceSinceLastGame.get(person);
+            if (indexOfLastPlay != null && minimumDistanceInGame > i - indexOfLastPlay) {
+                minimumDistanceInGame = i - indexOfLastPlay;
+                minimumChanged = true;
+            }
+            distanceSinceLastGame.put(person, i);
+
+            person = game.getTeamTwo().getPersonOne();
+            indexOfLastPlay = distanceSinceLastGame.get(person);
+            if (indexOfLastPlay != null && minimumDistanceInGame > i - indexOfLastPlay) {
+                minimumDistanceInGame = i - indexOfLastPlay;
+                minimumChanged = true;
+            }
+            distanceSinceLastGame.put(person, i);
+
+            person = game.getTeamTwo().getPersonTwo();
+            indexOfLastPlay = distanceSinceLastGame.get(person);
+            if (indexOfLastPlay != null && minimumDistanceInGame > i - indexOfLastPlay) {
+                minimumDistanceInGame = i - indexOfLastPlay;
+                minimumChanged = true;
+            }
+            distanceSinceLastGame.put(person, i);
+
+            if (minimumChanged) {
+                System.out.print(i + ":" + minimumDistanceInGame + " ");
+            }
+        }
+        System.out.println("");
+
     }
 
 
     private void validateGames(List<Game> games, double amount) {
         Map<Person, Integer> distanceSinceLastGame = new HashMap<>();
 //        double minimumDistanceFromLastGame = Math.floor(amount / 6) - 1;
-        double minimumDistanceFromLastGame;
-//        if (amount == 13) { //NIKLS example
-//            minimumDistanceFromLastGame = 2;
-//        } else
-        if (amount < 8) {
-            minimumDistanceFromLastGame = 0;
-        } else if (amount < 28) {
+//        double minimumDistanceFromLastGame = Math.floor((amount - 6) / 4) + 1;
+        double minimumDistanceFromLastGame = Math.floor((amount - 6) / 4) + 0;
+        if (amount < 18) {
             minimumDistanceFromLastGame = 1;
-        } else if (amount < 56) {
+        } else if (amount < 22) {
             minimumDistanceFromLastGame = 2;
-        }  else if (amount < 72) {
+        } else if (amount < 26) {
             minimumDistanceFromLastGame = 3;
         } else { //Og det er nok endnu bedre.
-            minimumDistanceFromLastGame = 4;
+            minimumDistanceFromLastGame = Math.floor((amount - 10) / 4) + 2;
         }
 
-        for (int i = 0; i < games.size() * 0.84; i++) { //The last games can be quite broken.
+        //games.size() * 0.84
+        double validGamesMaxIndex;
+        if (amount < 7) {
+            validGamesMaxIndex = games.size() - 1;
+        }
+//        else if (amount < 8) {
+//            validGamesMaxIndex = games.size() - 2;
+//        }
+        else { //Og det er nok endnu bedre.
+            validGamesMaxIndex = games.size() * 0.84;
+        }
+
+        for (int i = 0; i < validGamesMaxIndex; i++) { //The last games can be quite broken.
             Game game = games.get(i);
 
             Person person = game.getTeamOne().getPersonOne();
@@ -266,15 +470,15 @@ public class TableSoccerTournamentTest {
         for (Person person : persons) {
             List<Person> partners = pairsPlayed.get(person);
 
-            int i = persons.size() - partners.size();
-            if (i == 2) {
+            int distanceToTheoreticalMax = persons.size() - partners.size();
+            if (distanceToTheoreticalMax == 2) {
                 //Sometimes the last pair does not have a partner, then up to two players can have played #Persons - 2
                 //pairs.
                 countPlayersPlayedOneLess++;
-                Assert.assertTrue(countPlayersPlayedOneLess < 3);
+                Assert.assertFalse(countPlayersPlayedOneLess > 2);
             } else {
                 //Max amount of pairs a player can be in is #Persons - 1
-                Assert.assertFalse(i != 1);
+                Assert.assertFalse(distanceToTheoreticalMax != 1);
             }
 
             //No two same partners

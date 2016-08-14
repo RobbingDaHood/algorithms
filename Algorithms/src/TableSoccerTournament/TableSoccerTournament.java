@@ -16,7 +16,7 @@ public class TableSoccerTournament {
     private List<DoubleRing> rings;
     private boolean ringsHaveMorePairs = true;
     private Queue<Pair> nextPairRow = new LinkedList<>();
-    boolean firstCycleInRow = true;
+    int numberOfCycles = 0;
 
     public TableSoccerTournament(ArrayList<Person> players) {
         DoubleRing doubleRing = new DoubleRing(players);
@@ -75,8 +75,6 @@ public class TableSoccerTournament {
                 }
             }
 
-            //All rings have same size
-            //Then just merge
             if (cyclesFromUneven.isEmpty()) {
                 boolean anyPairsLeft = true;
                 while (anyPairsLeft) {
@@ -86,6 +84,23 @@ public class TableSoccerTournament {
                             this.nextPairRow.add(allNewCycle.poll());
                             anyPairsLeft = true;
                         }
+                    }
+                }
+            } else if (cyclesFromEven.size() < 2) {
+                for (Queue<Pair> allNewCycle : secondCyclesFromUneven) {
+                    while (!allNewCycle.isEmpty()) {
+                        this.nextPairRow.add(allNewCycle.poll());
+                    }
+                }
+
+                for (Queue<Pair> allNewCycle : cyclesFromEven) {
+                    while (!allNewCycle.isEmpty()) {
+                        this.nextPairRow.add(allNewCycle.poll());
+                    }
+                }
+                for (Queue<Pair> allNewCycle : cyclesFromUneven) {
+                    while (!allNewCycle.isEmpty()) {
+                        this.nextPairRow.add(allNewCycle.poll());
                     }
                 }
             } else {
@@ -131,7 +146,7 @@ public class TableSoccerTournament {
                     }
                 }
 
-                if (firstCycleInRow) {
+                if (numberOfCycles == 0) {
                     for (int i = 0; i < sizeOfEvenRoundDown; i++) {
                         this.nextPairRow.add(mergeEvenPairs.poll());
                     }
@@ -147,10 +162,8 @@ public class TableSoccerTournament {
                     while (!mergeSecondUnevenPairs.isEmpty()) {
                         this.nextPairRow.add(mergeSecondUnevenPairs.poll());
                     }
-
-                    firstCycleInRow = false;
                 } else {
-                    for (int i = 0; i < sizeOfEvenRoundup; i++) {
+                    for (int i = 0; i < (numberOfCycles % 2 == 1 ? sizeOfEvenRoundup : sizeOfEvenRoundDown); i++) {
                         this.nextPairRow.add(mergeEvenPairs.poll());
                     }
 
@@ -162,6 +175,7 @@ public class TableSoccerTournament {
                         this.nextPairRow.add(mergeEvenPairs.poll());
                     }
                 }
+                numberOfCycles++;
             }
         }
 
@@ -214,7 +228,7 @@ public class TableSoccerTournament {
 
             rings = newRings;
             ringsHaveMorePairs = newRings.size() > 0;
-            firstCycleInRow = true;
+            numberOfCycles = 0;
         }
     }
 
