@@ -64,7 +64,8 @@ public class DoubleRing {
             firstPart.addAll(lastPart);
 
             doubleRings.add(new DoubleRing(firstPart));
-        } else if (ringOne.size() > 1) //Else no pairs can be produced
+        } else
+            if (ringOne.size() > 1) //Else no pairs can be produced
             doubleRings.add(new DoubleRing(ringOne));
 
         if (ringTwo.size() > 1) //Else no pairs can be produced
@@ -104,5 +105,9 @@ public class DoubleRing {
 
     public String toString() {
         return ringOne.toString() + ringTwo.toString();
+    }
+
+    public int getIndex() {
+        return index;
     }
 }
