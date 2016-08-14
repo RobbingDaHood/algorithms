@@ -178,7 +178,7 @@ public class TableSoccerTournamentTest {
             tableSoccerTournament.generateNewRings();
         }
 
-        hackIT(pairsPlayed);
+        hackIT(allPairs, 4);
 
         validateTotalTournament(pairsPlayed);
         notInSameGameSequence(tableSoccerTournament.generateGameList(new LinkedList<Pair>(allPairs)), amount);
@@ -186,67 +186,68 @@ public class TableSoccerTournamentTest {
 //        System.out.println("Amount of players: " + amount + " resulted in " + tableSoccerTournament.generateGameList(allPairs).size() + " Games.");
     }
 
-    private void hackIT(Map<Person, List<Person>> pairsPlayed) {
-//        boolean atLeastOnevalid = true;
-//        int sequenceGameLength = 1;
-//
-//        while (atLeastOnevalid) {
-//            atLeastOnevalid = false;
-//
-//            outerwhile:
-//            for (int i = 0; i < pairsPlayed.size() - 1; i += sequenceGameLength) {
-//                Map<Person, Integer> personCounts = new HashMap<>();
-//                for (int k = 0; k < sequenceGameLength && i + k < games.size(); k++) {
-//                    Game game = games.get(i + k);
-//
-//                    Person person = game.getTeamOne().getPersonOne();
-//                    Integer personCount = personCounts.get(person);
-//                    if (personCount == null) {
-//                        personCounts.put(person, 1);
-//                    } else {
-//                        System.out.print(i + ":" + sequenceGameLength + " ");
-//                        break outerwhile;
-//                    }
-//
-//                    person = game.getTeamOne().getPersonTwo();
-//                    personCount = personCounts.get(person);
-//                    if (personCount == null) {
-//                        personCounts.put(person, 1);
-//                    } else {
-//                        System.out.print(i + ":" + sequenceGameLength + " ");
-//                        break outerwhile;
-//                    }
-//
-//
-//                    person = game.getTeamTwo().getPersonOne();
-//                    personCount = personCounts.get(person);
-//                    if (personCount == null) {
-//                        personCounts.put(person, 1);
-//                    } else {
-//                        System.out.print(i + ":" + sequenceGameLength + " ");
-//                        break outerwhile;
-//                    }
-//
-//
-//                    person = game.getTeamTwo().getPersonTwo();
-//                    personCount = personCounts.get(person);
-//                    if (personCount == null) {
-//                        personCounts.put(person, 1);
-//                    } else {
-//                        System.out.print(i + ":" + sequenceGameLength + " ");
-//                        break outerwhile;
-//                    }
-//                }
-//
-//                atLeastOnevalid = true;
-//            }
-//
-//            sequenceGameLength++;
-//        }
-//
-//        System.out.println("");
-////        System.out.println("GameDistance: " + (sequenceGameLength - 1));
+    private void hackIT(LinkedList<Pair> allPairs, int sequencePairLength) {
 
+        outerwhile:
+        for (int i = 0; i <= allPairs.size() - sequencePairLength; i += sequencePairLength) {
+            Map<Person, Integer> personCounts = new HashMap<>();
+            for (int k = 0; k < sequencePairLength && i + k <= allPairs.size(); k++) {
+                Pair game = allPairs.get(i + k);
+
+                Person person = game.getPersonOne();
+                Integer personCount = personCounts.get(person);
+                if (personCount == null) {
+                    personCounts.put(person, 1);
+                } else {
+                    //Find better candidate
+                    int foundMatch = 0;
+                    for (int l = i+k+1; l < allPairs.size() && foundMatch < sequencePairLength - k; l++) {
+                        Pair candidate = allPairs.get(l);
+
+                        Person personCandidate1 = candidate.getPersonOne();
+                        Integer personCountCandidate = personCounts.get(personCandidate1);
+                        if (personCountCandidate == null) {
+                            Person personCandidate2 = candidate.getPersonTwo();
+                            personCountCandidate = personCounts.get(personCandidate2);
+                            if (personCountCandidate == null) {
+                                personCounts.put(personCandidate1, 1);
+                                personCounts.put(personCandidate2, 1);
+                                foundMatch++;
+                                Collections.swap(allPairs, i + k, l);
+                                k++;
+                            }
+                        }
+                    }
+                }
+
+                person = game.getPersonTwo();
+                personCount = personCounts.get(person);
+                if (personCount == null) {
+                    personCounts.put(person, 1);
+                } else {
+                    //Find better candidate
+                    int foundMatch = 0;
+                    for (int l = i+k+1; l < allPairs.size() && foundMatch < sequencePairLength - k; l++) {
+                        Pair candidate = allPairs.get(l);
+
+                        Person personCandidate1 = candidate.getPersonOne();
+                        Integer personCountCandidate = personCounts.get(personCandidate1);
+                        if (personCountCandidate == null) {
+                            Person personCandidate2 = candidate.getPersonTwo();
+                            personCountCandidate = personCounts.get(personCandidate2);
+                            if (personCountCandidate == null) {
+                                personCounts.put(personCandidate1, 1);
+                                personCounts.put(personCandidate2, 1);
+                                foundMatch++;
+                                Collections.swap(allPairs, i + k, l);
+                                k++;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
     }
 
     private void notInSameGameSequence(List<Game> games, double amount) {
@@ -259,7 +260,7 @@ public class TableSoccerTournamentTest {
             atLeastOnevalid = false;
 
             outerwhile:
-            for (int i = 0; i < games.size() - 1; i += sequenceGameLength) {
+            for (int i = 0; i <= games.size() - sequenceGameLength; i += sequenceGameLength) {
                 Map<Person, Integer> personCounts = new HashMap<>();
                 for (int k = 0; k < sequenceGameLength && i + k < games.size(); k++) {
                     Game game = games.get(i + k);
