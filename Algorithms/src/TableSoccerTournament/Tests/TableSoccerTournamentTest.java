@@ -179,6 +179,7 @@ public class TableSoccerTournamentTest {
         }
 
         hackIT(allPairs, 4);
+        printHackItStatistics(tableSoccerTournament.generateGameList(new LinkedList<Pair>(allPairs)), 2);
 
         validateTotalTournament(pairsPlayed);
         notInSameGameSequence(tableSoccerTournament.generateGameList(new LinkedList<Pair>(allPairs)), amount);
@@ -201,7 +202,7 @@ public class TableSoccerTournamentTest {
                 } else {
                     //Find better candidate
                     int foundMatch = 0;
-                    for (int l = i+k+1; l < allPairs.size() && foundMatch < sequencePairLength - k; l++) {
+                    for (int l = i + k + 1; l < allPairs.size() && foundMatch < sequencePairLength - k; l++) {
                         Pair candidate = allPairs.get(l);
 
                         Person personCandidate1 = candidate.getPersonOne();
@@ -227,7 +228,7 @@ public class TableSoccerTournamentTest {
                 } else {
                     //Find better candidate
                     int foundMatch = 0;
-                    for (int l = i+k+1; l < allPairs.size() && foundMatch < sequencePairLength - k; l++) {
+                    for (int l = i + k + 1; l < allPairs.size() && foundMatch < sequencePairLength - k; l++) {
                         Pair candidate = allPairs.get(l);
 
                         Person personCandidate1 = candidate.getPersonOne();
@@ -425,6 +426,98 @@ public class TableSoccerTournamentTest {
             }
             distanceSinceLastGame.put(person, i);
         }
+
+    }
+
+    private void printHackItStatistics(List<Game> games, int sequenceLength) {
+        Map<Person, Integer> distanceSinceLastGames = new HashMap<>();
+        Map<Person, Double> maxDistanceSoFars = new HashMap<>();
+        int whenDidMaxGetBroken = -1;
+        int maxDistanceAllowed = 2;
+
+        for (int i = 0; i < games.size(); i++) {
+            Game game = games.get(i);
+
+            Person person = game.getTeamOne().getPersonOne();
+            Integer indexOfLastPlay = distanceSinceLastGames.get(person);
+            if (indexOfLastPlay != null) {
+                double maxDistanceSoFar = maxDistanceSoFars.get(person);
+                double distanceSinceLastGame = Math.floor((i - indexOfLastPlay) / sequenceLength);
+                if (maxDistanceSoFar < distanceSinceLastGame) {
+                    maxDistanceSoFars.put(person, distanceSinceLastGame);
+                }
+                if (whenDidMaxGetBroken == -1 && maxDistanceAllowed < distanceSinceLastGame) {
+                    whenDidMaxGetBroken = i;
+                }
+                distanceSinceLastGames.put(person, i);
+            } else {
+                maxDistanceSoFars.put(person, -Double.MAX_VALUE);
+                distanceSinceLastGames.put(person, i);
+            }
+
+            person = game.getTeamOne().getPersonTwo();
+            indexOfLastPlay = distanceSinceLastGames.get(person);
+            if (indexOfLastPlay != null) {
+                double maxDistanceSoFar = maxDistanceSoFars.get(person);
+                double distanceSinceLastGame = Math.floor((i - indexOfLastPlay) / sequenceLength);
+                if (maxDistanceSoFar < distanceSinceLastGame) {
+                    maxDistanceSoFars.put(person, distanceSinceLastGame);
+                }
+                if (whenDidMaxGetBroken == -1 && maxDistanceAllowed < distanceSinceLastGame) {
+                    whenDidMaxGetBroken = i;
+                }
+                distanceSinceLastGames.put(person, i);
+            } else {
+                maxDistanceSoFars.put(person, -Double.MAX_VALUE);
+                distanceSinceLastGames.put(person, i);
+            }
+
+            person = game.getTeamTwo().getPersonOne();
+            indexOfLastPlay = distanceSinceLastGames.get(person);
+            if (indexOfLastPlay != null) {
+                double maxDistanceSoFar = maxDistanceSoFars.get(person);
+                double distanceSinceLastGame = Math.floor((i - indexOfLastPlay) / sequenceLength);
+                if (maxDistanceSoFar < distanceSinceLastGame) {
+                    maxDistanceSoFars.put(person, distanceSinceLastGame);
+                }
+                if (whenDidMaxGetBroken == -1 && maxDistanceAllowed < distanceSinceLastGame) {
+                    whenDidMaxGetBroken = i;
+                }
+                distanceSinceLastGames.put(person, i);
+            } else {
+                maxDistanceSoFars.put(person, -Double.MAX_VALUE);
+                distanceSinceLastGames.put(person, i);
+            }
+
+            person = game.getTeamTwo().getPersonTwo();
+            indexOfLastPlay = distanceSinceLastGames.get(person);
+            if (indexOfLastPlay != null) {
+                double maxDistanceSoFar = maxDistanceSoFars.get(person);
+                double distanceSinceLastGame = Math.floor((i - indexOfLastPlay) / sequenceLength);
+                if (maxDistanceSoFar < distanceSinceLastGame) {
+                    maxDistanceSoFars.put(person, distanceSinceLastGame);
+                }
+                if (whenDidMaxGetBroken == -1 && maxDistanceAllowed < distanceSinceLastGame) {
+                    whenDidMaxGetBroken = i;
+                }
+                distanceSinceLastGames.put(person, i);
+            } else {
+                maxDistanceSoFars.put(person, -Double.MAX_VALUE);
+                distanceSinceLastGames.put(person, i);
+            }
+
+
+        }
+
+        if (whenDidMaxGetBroken != -1){
+            System.out.println("whenDidMaxGetBroken: " + whenDidMaxGetBroken);
+        }
+
+        System.out.print("Distance After HackIt, pr. Person: ");
+        for (Person person : maxDistanceSoFars.keySet()) {
+            System.out.print(person.getName() + ":" + maxDistanceSoFars.get(person) + " ");
+        }
+        System.out.println("");
 
     }
 
