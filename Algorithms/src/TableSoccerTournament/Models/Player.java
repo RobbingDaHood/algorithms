@@ -3,10 +3,10 @@ package TableSoccerTournament.Models;
 /**
  * Created by super on 07/08/2016.
  */
-public class Person {
+public class Player {
     private String name;
 
-    public Person(String name) {
+    public Player(String name) {
         this.name = name;
     }
 

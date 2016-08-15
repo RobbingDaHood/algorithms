@@ -9,10 +9,10 @@ import java.util.List;
 public class Game {
     private Pair teamOne;
     private Pair teamTwo;
-    private List<Person> dummyPersons;
+    private List<Player> dummyPlayers;
 
     public Game() {
-        this.dummyPersons = new LinkedList<>();
+        this.dummyPlayers = new LinkedList<>();
     }
 
     public Game(Pair teamOne, Pair teamTwo) {
@@ -36,16 +36,16 @@ public class Game {
         this.teamTwo = teamTwo;
     }
 
-    public List<Person> getDummyPersons() {
-        return dummyPersons;
+    public List<Player> getDummyPlayers() {
+        return dummyPlayers;
     }
 
-    public void setDummyPersons(List<Person> dummyPersons) {
-        this.dummyPersons = dummyPersons;
+    public void setDummyPlayers(List<Player> dummyPlayers) {
+        this.dummyPlayers = dummyPlayers;
     }
 
-    public void addDummyPlayer(Person person) {
-        dummyPersons.add(person);
+    public void addDummyPlayer(Player player) {
+        dummyPlayers.add(player);
     }
 
     public String toString() {

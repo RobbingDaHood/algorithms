@@ -2,7 +2,7 @@ package TableSoccerTournament;
 
 import TableSoccerTournament.Models.Game;
 import TableSoccerTournament.Models.Pair;
-import TableSoccerTournament.Models.Person;
+import TableSoccerTournament.Models.Player;
 
 import java.util.*;
 
@@ -18,7 +18,7 @@ public class TableSoccerTournament {
     private Queue<Pair> nextPairRow = new LinkedList<>();
     int numberOfCycles = 0;
 
-    public TableSoccerTournament(ArrayList<Person> players) {
+    public TableSoccerTournament(ArrayList<Player> players) {
         DoubleRing doubleRing = new DoubleRing(players);
         this.rings = new LinkedList<>();
         rings.add(doubleRing);
@@ -184,15 +184,6 @@ public class TableSoccerTournament {
 
     public boolean isRingsHaveMorePairs() {
         return ringsHaveMorePairs;
-    }
-
-
-    public List<Game> generateGameList(Queue<Pair> tournamentOfPairs) {
-        List<Game> gameList = new LinkedList<>();
-        while (tournamentOfPairs.size() > 1) {
-            gameList.add(new Game(tournamentOfPairs.poll(), tournamentOfPairs.poll()));
-        }
-        return gameList;
     }
 
     public void generateNewRings() {
