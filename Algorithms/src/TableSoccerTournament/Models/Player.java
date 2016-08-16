@@ -21,4 +21,8 @@ public class Player {
     public String toString() {
         return name;
     }
+
+    public boolean equals(Object o) {
+        return o instanceof Player && o.toString().equals(name);
+    }
 }
