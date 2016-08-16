@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="algorithms:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/algorithms_jar</output-path>
+    <root id="archive" name="algorithms.jar">
+      <element id="module-output" name="Algorithms" />
+      <element id="extracted-dir" path="$APPLICATION_HOME_DIR$/lib/junit-4.12.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$APPLICATION_HOME_DIR$/lib/hamcrest-core-1.3.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

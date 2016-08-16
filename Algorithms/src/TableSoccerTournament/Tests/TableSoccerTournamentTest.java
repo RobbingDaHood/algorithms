@@ -181,6 +181,7 @@ public class TableSoccerTournamentTest {
             List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, 2, Integer.MAX_VALUE);
             TournamentGeneratorHelper.generateJson(games1, 2);
 
+
             System.out.println("Amount of players: " + i + " resulted in " + games1.size() + " Games. At sequence length " + 2 + " games:");
 
             testFillTournamnetFeatures(games1, 2, false);
@@ -207,6 +208,13 @@ public class TableSoccerTournamentTest {
         }
     }
 
+    public static int factorial(int n) {
+        int fact = 1; // this  will be the result
+        for (int i = 1; i <= n; i++) {
+            fact *= i;
+        }
+        return fact;
+    }
 
     private void testFillTournamnetFeatures(List<Game> games, int sequenceLength, boolean unsafe) {
         Map<Player, List<Player>> pairsPlayed = new HashMap<>();
