@@ -12,15 +12,66 @@ import java.util.*;
  */
 public class TournamentGeneratorHelper {
 
-    public static List<Game> modifyMaxAmountOfPlays(List<Game> games, int maxAmountOfPlays, int sequenceLength, int stopAfterGame) {
+    public static List<Game> modifyMaxAmountOfPlays(List<Game> games, int maxLegalAmountOfPlays, int sequenceLength, int stopAfterGame) {
         Map<Player, List<Player>> pairsPlayed = new HashMap<>();
+        Map<Player, Integer> totalCount = new HashMap<>();
         int maxPairsYet = -Integer.MAX_VALUE;
         List<Game> result = new LinkedList<>();
 
+        if (games.isEmpty())
+            return result;
+
+        for (int i1 = 0; i1 < games.size(); i1++) {
+            Game game = games.get(i1);
+
+            Integer count = totalCount.get(game.getTeamOne().getPlayerOne());
+            if (count == null) {
+                totalCount.put(game.getTeamOne().getPlayerOne(), 1);
+            } else {
+                totalCount.put(game.getTeamOne().getPlayerOne(), count + 1);
+            }
+
+            count = totalCount.get(game.getTeamOne().getPlayerTwo());
+            if (count == null) {
+                totalCount.put(game.getTeamOne().getPlayerTwo(), 1);
+            } else {
+                totalCount.put(game.getTeamOne().getPlayerTwo(), count + 1);
+            }
+
+            count = totalCount.get(game.getTeamTwo().getPlayerOne());
+            if (count == null) {
+                totalCount.put(game.getTeamTwo().getPlayerOne(), 1);
+            } else {
+                totalCount.put(game.getTeamTwo().getPlayerOne(), count + 1);
+            }
+
+            count = totalCount.get(game.getTeamTwo().getPlayerTwo());
+            if (count == null) {
+                totalCount.put(game.getTeamTwo().getPlayerTwo(), 1);
+            } else {
+                totalCount.put(game.getTeamTwo().getPlayerTwo(), count + 1);
+            }
+        }
+
+        int minAmountOfPlays = maxLegalAmountOfPlays;
+
+        for (Player player : totalCount.keySet()) {
+            if (totalCount.get(player) != null && !player.equals(new Player("null"))) {
+                if (minAmountOfPlays > totalCount.get(player)) {
+                    minAmountOfPlays = totalCount.get(player);
+                }
+            }
+        }
+
+        maxLegalAmountOfPlays = minAmountOfPlays;
+//        System.out.println("maxLegalAmountOfPlays is now: " + maxLegalAmountOfPlays);
+
+        int k = 0;
         outerLoop:
-        for (int i = 0; i <= games.size() - sequenceLength && i <= stopAfterGame; i += sequenceLength) {
+        for (int i = 0; i < games.size() && i <= stopAfterGame; i += k) {
+
             List<Game> sequence = new LinkedList<>();
-            for (int k = 0; k < sequenceLength && i + k <= games.size(); k++) {
+            for (k = 0; k < sequenceLength && i + k < games.size(); k++) {
                 Game game = games.get(i + k);
 
                 List<Player> players = pairsPlayed.get(game.getTeamOne().getPlayerOne());
@@ -43,47 +94,54 @@ public class TournamentGeneratorHelper {
                 sequence.add(game);
             }
 
-            if (maxPairsYet <= maxAmountOfPlays) {
+            if (maxPairsYet <= maxLegalAmountOfPlays) {
                 result.addAll(sequence);
                 addGames(pairsPlayed, sequence);
+                for (Game game : sequence) {
+                    int count = totalCount.get(game.getTeamTwo().getPlayerOne());
+                    totalCount.put(game.getTeamOne().getPlayerOne(), count - 1);
+                    totalCount.put(game.getTeamOne().getPlayerTwo(), count - 1);
+                    totalCount.put(game.getTeamTwo().getPlayerOne(), count - 1);
+                    totalCount.put(game.getTeamTwo().getPlayerTwo(), count - 1);
+                }
             } else {
-                addAlreadyLegalGames(games, maxAmountOfPlays, sequenceLength, pairsPlayed, result, i, sequence);
+                addAlreadyLegalGames(games, maxLegalAmountOfPlays, sequenceLength, pairsPlayed, result, i, sequence);
 
                 //See if there are any players
-                List<Player> playersMissingOneOrMoreGames = getPlayersMissingGames(maxAmountOfPlays, pairsPlayed);
+                List<Player> playersMissingOneOrMoreGames = getPlayersMissingGames(maxLegalAmountOfPlays, pairsPlayed);
                 if (playersMissingOneOrMoreGames.size() < 1) {
                     break outerLoop;
                 }
 
                 if (playersMissingOneOrMoreGames.size() >= 4) {
-                    if (addNewGamesWithoutDummies(maxAmountOfPlays, pairsPlayed, result, playersMissingOneOrMoreGames, true))
+                    if (addNewGamesWithoutDummies(maxLegalAmountOfPlays, pairsPlayed, result, playersMissingOneOrMoreGames, true))
                         break outerLoop;
 
                     //See if there are any players
-                    playersMissingOneOrMoreGames = getPlayersMissingGames(maxAmountOfPlays, pairsPlayed, playersMissingOneOrMoreGames);
+                    playersMissingOneOrMoreGames = getPlayersMissingGames(maxLegalAmountOfPlays, pairsPlayed, playersMissingOneOrMoreGames);
                     if (playersMissingOneOrMoreGames.size() < 1) {
                         break outerLoop;
                     }
 
                     if (playersMissingOneOrMoreGames.size() >= 4) {
-                        if (addNewGamesWithoutDummies(maxAmountOfPlays, pairsPlayed, result, playersMissingOneOrMoreGames, false))
+                        if (addNewGamesWithoutDummies(maxLegalAmountOfPlays, pairsPlayed, result, playersMissingOneOrMoreGames, false))
                             break outerLoop;
                     }
                 }
 
                 //See if there are any players
-                playersMissingOneOrMoreGames = getPlayersMissingGames(maxAmountOfPlays, pairsPlayed, playersMissingOneOrMoreGames);
+                playersMissingOneOrMoreGames = getPlayersMissingGames(maxLegalAmountOfPlays, pairsPlayed, playersMissingOneOrMoreGames);
                 if (playersMissingOneOrMoreGames.size() < 1) {
                     break outerLoop;
                 }
 
                 if (playersMissingOneOrMoreGames.size() >= 3) {
-                    playersMissingOneOrMoreGames = generateOneDummyGames(maxAmountOfPlays, pairsPlayed, result, playersMissingOneOrMoreGames);
+                    playersMissingOneOrMoreGames = generateOneDummyGames(maxLegalAmountOfPlays, pairsPlayed, result, playersMissingOneOrMoreGames);
                     if (playersMissingOneOrMoreGames == null) break outerLoop;
                 }
 
                 if (playersMissingOneOrMoreGames.size() >= 2) {
-                    playersMissingOneOrMoreGames = generateDoubleDummyGames(maxAmountOfPlays, pairsPlayed, result, playersMissingOneOrMoreGames);
+                    playersMissingOneOrMoreGames = generateDoubleDummyGames(maxLegalAmountOfPlays, pairsPlayed, result, playersMissingOneOrMoreGames);
                     if (playersMissingOneOrMoreGames == null) break outerLoop;
                 }
 
@@ -96,7 +154,7 @@ public class TournamentGeneratorHelper {
                 }
 
                 //See if there are any players
-                playersMissingOneOrMoreGames = getPlayersMissingGames(maxAmountOfPlays, pairsPlayed, playersMissingOneOrMoreGames);
+                playersMissingOneOrMoreGames = getPlayersMissingGames(maxLegalAmountOfPlays, pairsPlayed, playersMissingOneOrMoreGames);
                 if (playersMissingOneOrMoreGames.size() < 1) {
                     break outerLoop;
                 }
@@ -313,30 +371,34 @@ public class TournamentGeneratorHelper {
     }
 
     public static void addTeam(Map<Player, List<Player>> pairsPlayed, Player playerOne, Player playerTwo) {
-        if (pairsPlayed.get(playerOne) == null) {
-            LinkedList<Player> players = new LinkedList<>();
-            players.add(playerTwo);
-            pairsPlayed.put(playerOne, players);
-        } else {
-            pairsPlayed.get(playerOne).add(playerTwo);
-        }
+       if (!playerOne.equals(new Player("null"))) {
+           if (pairsPlayed.get(playerOne) == null) {
+               LinkedList<Player> players = new LinkedList<>();
+               players.add(playerTwo);
+               pairsPlayed.put(playerOne, players);
+           } else {
+               pairsPlayed.get(playerOne).add(playerTwo);
+           }
+       }
 
-        if (pairsPlayed.get(playerTwo) == null) {
-            LinkedList<Player> players = new LinkedList<>();
-            players.add(playerOne);
-            pairsPlayed.put(playerTwo, players);
-        } else {
-            pairsPlayed.get(playerTwo).add(playerOne);
+        if (!playerTwo.equals(new Player("null"))) {
+            if (pairsPlayed.get(playerTwo) == null) {
+                LinkedList<Player> players = new LinkedList<>();
+                players.add(playerOne);
+                pairsPlayed.put(playerTwo, players);
+            } else {
+                pairsPlayed.get(playerTwo).add(playerOne);
+            }
         }
     }
 
     public static LinkedList<Pair> modifyTorunamentForSequenceLength(LinkedList<Pair> allPairs, int sequencePairLength, boolean unsafe) {
         outerwhile:
-        for (int i = 0; i <= allPairs.size() - sequencePairLength; i += sequencePairLength) {
+        for (int i = 0; i < allPairs.size(); i += sequencePairLength) {
             Map<Player, Integer> personCounts = new HashMap<>();
             boolean foundSequence = true;
             innerwhile:
-            for (int k = 0; k < sequencePairLength && i + k <= allPairs.size(); k++) {
+            for (int k = 0; k < sequencePairLength && i + k < allPairs.size(); k++) {
                 foundSequence = false;
                 Pair game = allPairs.get(i + k);
 

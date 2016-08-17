@@ -136,17 +136,19 @@ public class TableSoccerTournamentTest {
 
     @org.junit.Test
     public void getFullTournamentFeaturesCustom() throws Exception {
-        ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(1000);
+        int i = 17;
+        int sequenceLength = 3;
+        ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(i);
         TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
         Queue<Pair> pairs = tableSoccerTournament.generateTournament();
-        Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), 3 * 2, false);
+        Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), sequenceLength * 2, false);
         List<Game> games = TournamentGeneratorHelper.generateGameList(pairs1);
-        List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, 3, Integer.MAX_VALUE);
-        TournamentGeneratorHelper.generateJson(games1, 3);
+        List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, sequenceLength, Integer.MAX_VALUE);
+        TournamentGeneratorHelper.generateJson(games1, sequenceLength);
 
-        System.out.println("Amount of players: " + 99 + " resulted in " + games1.size() + " Games. At sequence length " + 3 + " games:");
+        System.out.println("Amount of players: " + i + " resulted in " + games1.size() + "(" + (games1.size()*4/ + i) + ") Games. At sequence length " + sequenceLength + " games.");
 
-        testFillTournamnetFeatures(games1, 3, false);
+        testFillTournamnetFeatures(games1, sequenceLength, false);
         System.out.println("");
     }
 
@@ -162,7 +164,7 @@ public class TableSoccerTournamentTest {
             List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, 10, 2, Integer.MAX_VALUE);
             TournamentGeneratorHelper.generateJson(games1, 2);
 
-            System.out.println("Amount of players: " + i + " resulted in " + games1.size() + " Games. At sequence length " + 2 + " games:");
+            System.out.println("Amount of players: " + i + " resulted in " + games1.size() + "(" + (games1.size()*4/ + i) + ") Games. At sequence length " + 2 + " games.");
 
             testFillTournamnetFeatures(games1, 2, false);
             System.out.println("");
@@ -181,10 +183,29 @@ public class TableSoccerTournamentTest {
             List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, 2, Integer.MAX_VALUE);
             TournamentGeneratorHelper.generateJson(games1, 2);
 
-
-            System.out.println("Amount of players: " + i + " resulted in " + games1.size() + " Games. At sequence length " + 2 + " games:");
+            System.out.println("Amount of players: " + i + " resulted in " + games1.size() + "(" + (games1.size()*4/ + i) + ") Games. At sequence length " + 2 + " games.");
 
             testFillTournamnetFeatures(games1, 2, false);
+            System.out.println("");
+        }
+    }
+
+    @org.junit.Test
+    public void getFullTournamentFeaturesMAX_1() throws Exception {
+        //Max plays: i * gamelength / 4
+        for (int i = 4; i < 100; i++) {
+            int sequenceLength = 1;
+            ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(i);
+            TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
+            Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+            Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), sequenceLength * 2, false);
+            List<Game> games = TournamentGeneratorHelper.generateGameList(pairs1);
+            List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, sequenceLength, Integer.MAX_VALUE);
+            TournamentGeneratorHelper.generateJson(games1, 2);
+
+            System.out.println("Amount of players: " + i + " resulted in " + games1.size() + "(" + (games1.size()*4/ + i) + ") Games. At sequence length " + sequenceLength + " games.");
+
+            testFillTournamnetFeatures(games1, sequenceLength, false);
             System.out.println("");
         }
     }
@@ -201,30 +222,26 @@ public class TableSoccerTournamentTest {
             List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, 3, Integer.MAX_VALUE);
             TournamentGeneratorHelper.generateJson(games1, 3);
 
-            System.out.println("Amount of players: " + i + " resulted in " + games1.size() + " Games. At sequence length " + 3 + " games:");
+            System.out.println("Amount of players: " + i + " resulted in " + games1.size() + "(" + (games1.size()*4/ + i) + ") Games. At sequence length " + 3 + " games.");
 
             testFillTournamnetFeatures(games1, 3, false);
             System.out.println("");
         }
     }
 
-    public static int factorial(int n) {
-        int fact = 1; // this  will be the result
-        for (int i = 1; i <= n; i++) {
-            fact *= i;
-        }
-        return fact;
-    }
-
     private void testFillTournamnetFeatures(List<Game> games, int sequenceLength, boolean unsafe) {
+        if (games.isEmpty())
+            return;
+
         Map<Player, List<Player>> pairsPlayed = new HashMap<>();
 
         int dummyGames = 0;
 
         double maxGamesPlayedDistance = -Double.MAX_VALUE;
-        for (int i = 0; i <= games.size() - sequenceLength; i += sequenceLength) {
+        int k = 0;
+        for (int i = 0; i < games.size(); i += k) {
             List<Player> plaersPlayedInSequence = new LinkedList<>();
-            for (int k = 0; k < sequenceLength && i + k <= games.size(); k++) {
+            for (k = 0; k < sequenceLength && i + k < games.size(); k++) {
                 Game game = games.get(i + k);
 
                 if (!TournamentGeneratorHelper.isDummyGame(game.getTeamOne(), game.getTeamTwo())) {
@@ -247,6 +264,8 @@ public class TableSoccerTournamentTest {
                     plaersPlayedInSequence.add(game.getTeamTwo().getPlayerTwo());
                 } else {
                     dummyGames++;
+                    TournamentGeneratorHelper.addTeam(pairsPlayed, game.getTeamOne().getPlayerOne(), game.getTeamOne().getPlayerTwo());
+                    TournamentGeneratorHelper.addTeam(pairsPlayed, game.getTeamTwo().getPlayerOne(), game.getTeamTwo().getPlayerTwo());
                 }
             }
 
@@ -269,6 +288,22 @@ public class TableSoccerTournamentTest {
                 System.out.println("Max distance is now: " + maxGamesPlayedDistance + " at game: " + i + " ");
             }
         }
+
+        double maxAmountOfPlays = -Double.MAX_VALUE;
+        double minAmountOfPlays = Double.MAX_VALUE;
+
+        for (Player player : pairsPlayed.keySet()) {
+            if (pairsPlayed.get(player) != null && !player.equals(new Player("null"))) {
+                if (maxAmountOfPlays < pairsPlayed.get(player).size()) {
+                    maxAmountOfPlays = pairsPlayed.get(player).size();
+                }
+                if (minAmountOfPlays > pairsPlayed.get(player).size()) {
+                    minAmountOfPlays = pairsPlayed.get(player).size();
+                }
+            }
+        }
+
+        Assert.assertFalse(maxAmountOfPlays != minAmountOfPlays);
 
         if (dummyGames > 0)
             System.out.println("Dummies: " + dummyGames);
