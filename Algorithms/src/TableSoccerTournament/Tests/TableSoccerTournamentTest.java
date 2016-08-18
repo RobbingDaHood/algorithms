@@ -5,6 +5,8 @@ import TableSoccerTournament.Models.Pair;
 import TableSoccerTournament.Models.Player;
 import TableSoccerTournament.TableSoccerTournament;
 import TableSoccerTournament.TournamentGeneratorHelper;
+import TableSoccerTournament.BruteForcer;
+import TableSoccerTournament.SelectivePair;
 import org.junit.Assert;
 
 import java.util.*;
@@ -140,7 +142,7 @@ public class TableSoccerTournamentTest {
         int sequenceLength = 3;
         ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(i);
         TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
-        Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+        Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
         Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), sequenceLength * 2, false);
         List<Game> games = TournamentGeneratorHelper.generateGameList(pairs1);
         List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, sequenceLength, Integer.MAX_VALUE);
@@ -158,7 +160,7 @@ public class TableSoccerTournamentTest {
         for (int i = 4; i < 100; i++) {
             ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(i);
             TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
-            Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+            Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
             Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), 2 * 2, false);
             List<Game> games = TournamentGeneratorHelper.generateGameList(pairs1);
             List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, 10, 2, Integer.MAX_VALUE);
@@ -177,7 +179,7 @@ public class TableSoccerTournamentTest {
         for (int i = 4; i < 100; i++) {
             ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(i);
             TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
-            Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+            Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
             Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), 2 * 2, false);
             List<Game> games = TournamentGeneratorHelper.generateGameList(pairs1);
             List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, 2, Integer.MAX_VALUE);
@@ -197,7 +199,7 @@ public class TableSoccerTournamentTest {
             int sequenceLength = 1;
             ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(i);
             TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
-            Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+            Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
             Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), sequenceLength * 2, false);
             List<Game> games = TournamentGeneratorHelper.generateGameList(pairs1);
             List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, sequenceLength, Integer.MAX_VALUE);
@@ -216,7 +218,7 @@ public class TableSoccerTournamentTest {
         for (int i = 4; i < 100; i++) {
             ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(i);
             TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
-            Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+            Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
             Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), 3 * 2, false);
             List<Game> games = TournamentGeneratorHelper.generateGameList(pairs1);
             List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, Integer.MAX_VALUE, 3, Integer.MAX_VALUE);
@@ -225,6 +227,43 @@ public class TableSoccerTournamentTest {
             System.out.println("Amount of players: " + i + " resulted in " + games1.size() + "(" + (games1.size()*4/ + i) + ") Games. At sequence length " + 3 + " games.");
 
             testFillTournamnetFeatures(games1, 3, false);
+            System.out.println("");
+        }
+    }
+
+    @org.junit.Test
+    public void getFullTournamentFeaturesMAX_2_BRUTE() throws Exception {
+        //Max plays: i * gamelength / 4
+        for (int i = 4; i < 100; i++) {
+            ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(i);
+            TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
+            Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
+
+            BruteForcer bruteForcer = new BruteForcer(pairs, 2);
+            List<Pair> bestCandidate = bruteForcer.getBestCandidate();
+            System.out.println("Counter " + bruteForcer.getCounter());
+            List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
+
+            System.out.println("Amount of players: " + i + " resulted in " + games.size() + "(" + (games.size()*4/ + i) + ") Games. At sequence length " + 2 + " games.");
+
+
+            testFillTournamnetFeatures(games, 2, false);
+            System.out.println("");
+        }
+    }
+
+    @org.junit.Test
+    public void getFullTournamentFeaturesMAX_2_SelectivePair() throws Exception {
+        //Max plays: i * gamelength / 4
+        for (int i = 4; i < 100; i++) {
+            SelectivePair bruteForcer = new SelectivePair(i, 2);
+            List<Pair> bestCandidate = bruteForcer.getBestCandidate();
+            List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
+
+            System.out.println("Amount of players: " + i + " resulted in " + games.size() + "(" + (games.size()*4/ + i) + ") Games. At sequence length " + 2 + " games.");
+
+
+            testFillTournamnetFeatures(games, 2, false);
             System.out.println("");
         }
     }

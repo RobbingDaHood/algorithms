@@ -462,7 +462,7 @@ public class TournamentGeneratorHelper {
     public static List<Game> generateTournamentGameList(int amountOfPlayers) {
         ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(amountOfPlayers);
         TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
-        Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+        Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
         return TournamentGeneratorHelper.generateGameList(pairs);
     }
 
@@ -470,7 +470,7 @@ public class TournamentGeneratorHelper {
     public static List<Game> generateTournamentGameList(int amountOfPlayers, int sequenceLength) {
         ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(amountOfPlayers);
         TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
-        Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+        Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
         TournamentGeneratorHelper.modifyTorunamentForSequenceLength((LinkedList) pairs, sequenceLength, true);
         return TournamentGeneratorHelper.generateGameList(pairs);
     }
@@ -479,11 +479,24 @@ public class TournamentGeneratorHelper {
     public static String generateTournamentGameList(int amountOfPlayers, int sequenceLength, int maxGames) {
         ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(amountOfPlayers);
         TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
-        Queue<Pair> pairs = tableSoccerTournament.generateTournament();
+        Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
         Queue<Pair> pairs1 = TournamentGeneratorHelper.modifyTorunamentForSequenceLength(new LinkedList<>(pairs), sequenceLength * 2, false);
         List<Game> games = TournamentGeneratorHelper.generateGameList(pairs1);
         List<Game> games1 = TournamentGeneratorHelper.modifyMaxAmountOfPlays(games, maxGames, sequenceLength, Integer.MAX_VALUE);
         return TournamentGeneratorHelper.generateJson(games1, sequenceLength);
+    }
+
+
+    public static String generateTournamentGameListBrute(int amountOfPlayers, int sequenceLength, int maxGames) {
+        ArrayList<Player> players = TournamentGeneratorHelper.generatePersons(amountOfPlayers);
+        TableSoccerTournament tableSoccerTournament = new TableSoccerTournament(players);
+        Queue<Pair> pairs = tableSoccerTournament.generateAllLegalPairs();
+
+        BruteForcer bruteForcer = new BruteForcer(pairs, sequenceLength);
+        LinkedList<Pair> bestCandidate = bruteForcer.getBestCandidate();
+        List<Game> games = TournamentGeneratorHelper.generateGameList(bestCandidate);
+
+        return TournamentGeneratorHelper.generateJson(games, sequenceLength);
     }
 
 

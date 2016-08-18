@@ -25,7 +25,7 @@ public class TableSoccerTournament {
     }
 
 
-    public Queue<Pair> generateTournament() {
+    public Queue<Pair> generateAllLegalPairs() {
         while (ringsHaveMorePairs) {
             generateNextRow();
         }

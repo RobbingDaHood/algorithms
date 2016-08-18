@@ -1,12 +1,5 @@
 package TableSoccerTournament;
 
-import TableSoccerTournament.Models.Game;
-import TableSoccerTournament.Models.Pair;
-import TableSoccerTournament.Models.Player;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
 
 /**
  * Created by super on 15/08/2016.
@@ -39,9 +32,9 @@ public class Executor {
 
         if (args.length > 1 && args[2] != null) {
             maxGames = Integer.valueOf(args[2]);
-            result = TournamentGeneratorHelper.generateTournamentGameList(amountOfPlayers, sequenceLength, maxGames);
+            result = TournamentGeneratorHelper.generateTournamentGameListBrute(amountOfPlayers, sequenceLength, maxGames);
         } else {
-            result = TournamentGeneratorHelper.generateTournamentGameList(amountOfPlayers, sequenceLength, Integer.MAX_VALUE);
+            result = TournamentGeneratorHelper.generateTournamentGameListBrute(amountOfPlayers, sequenceLength, Integer.MAX_VALUE);
         }
 
         System.out.println(result);
