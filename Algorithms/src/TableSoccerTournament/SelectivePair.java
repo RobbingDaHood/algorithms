@@ -14,12 +14,12 @@ public class SelectivePair {
     private Queue<Pair> allPossiblePairs = null;
     private Queue<Pair> originalPairs = null; //Testing
     private LinkedList<Pair> currentTournament = new LinkedList<>();
-    private int sequenceLength;
+    private int sequenceLengthInPairs;
     private int amountOfPlayers;
 
-    private LinkedList<Pair> bestCandidate = new LinkedList<>();
+//    private LinkedList<Pair> bestCandidate = new LinkedList<>();
     Map<Player, List<Player>> pairsPlayed = new HashMap<>();
-    Map<Integer, List<Player>> playersAmountOfPairs = new HashMap<>();
+    Map<Integer, HashSet<Player>> playersAmountOfPairs = new HashMap<>();
     int minimumMatches = 0;
 
 
@@ -30,56 +30,51 @@ public class SelectivePair {
     }
 
     public LinkedList<Pair> getBestCandidate() {
-        return bestCandidate;
+        return currentTournament;
     }
 
-    public SelectivePair(int amountOfPlayers, int sequenceLength) {
+    public SelectivePair(int amountOfPlayers, int sequenceLengthInPairs) {
         this.amountOfPlayers = amountOfPlayers;
-        this.sequenceLength = sequenceLength;
+        this.sequenceLengthInPairs = sequenceLengthInPairs;
         initTournament();
         generateTournamentBrute();
     }
 
     public void generateTournamentBrute() {
 
+        if (sequenceLengthInPairs * 2 > amountOfPlayers) {
+            return;
+        }
+
         boolean foundSequence = true;
+        List<Player> playersPlayedInSequence = new LinkedList<>();
+        outerwhile:
         while (foundSequence) {
             foundSequence = false;
 
             //need to create legal sequences.
-            List<Player> playersPlayedInSequence = new LinkedList<>();
-
-            if (allPossiblePairs.size() < sequenceLength) {
-                if (allPossiblePairs.size() > 1) {
-                    for (Pair pairCandidate : new LinkedList<>(allPossiblePairs)) {
-                        if (!playersPlayedInSequence.contains(pairCandidate.getPlayerOne()) &&
-                                !playersPlayedInSequence.contains(pairCandidate.getPlayerTwo())) {
-                            addPair(playersPlayedInSequence, pairCandidate);
-                        }
-                    }
-                }
-
-                Assert.assertFalse(allPossiblePairs.size() == 1);
-
-                currentTournament.add(allPossiblePairs.poll());
-                currentTournament.add(new Pair(new Player("null"), new Player("null")));
-
-                return;
+            if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
+                playersPlayedInSequence = new LinkedList<>();
             }
 
             sequenceloop:
-            for (int k = 0; k < sequenceLength; k++) {
+            for (int k = 0; k < sequenceLengthInPairs; k++) { //Could end faster if there is many "Very nice candidates"
 
                 Pair bestCandidate = null;
-                int bestCandidateDistance = -1;
+                int bestCandidateDistance = Integer.MAX_VALUE;
+                boolean noVeryNiceCandidates = true;
                 for (Pair pairCandidate : new LinkedList<>(allPossiblePairs)) {
 
-                    if (playersPlayedInSequence.size() / 2 == sequenceLength) {
-                        break sequenceloop;
+                    //This could happen because of "Very nice candidates"
+                    if (allPossiblePairs.isEmpty()) {
+                        //No more pairs left at the end is a legal state.
+                        break outerwhile;
+                    } else if (playersPlayedInSequence.size() == sequenceLengthInPairs  * 2) {
+                        break sequenceloop; //Created valid sequence
                     }
 
                     //Lets see if this is possible, else it could just be in the same game
-                    //Could be tested with sequence 1
+                    //Could be tested with sequence 2
                     if (!playersPlayedInSequence.contains(pairCandidate.getPlayerOne()) &&
                             !playersPlayedInSequence.contains(pairCandidate.getPlayerTwo())) {
 
@@ -88,6 +83,7 @@ public class SelectivePair {
                         if (playersAmountOfPairs.get(minimumMatches).contains(pairCandidate.getPlayerOne()) &&
                                 playersAmountOfPairs.get(minimumMatches).contains(pairCandidate.getPlayerTwo())) {
                             addPair(playersPlayedInSequence, pairCandidate);
+                            noVeryNiceCandidates = false;
                         } else {
                             //Find best possible pair for this spot in the sequence
                             pairsPlayed.putIfAbsent(pairCandidate.getPlayerOne(), new LinkedList<>());
@@ -95,39 +91,45 @@ public class SelectivePair {
                             int playerOnePairs = pairsPlayed.get(pairCandidate.getPlayerOne()).size();
                             int playerTwoPairs = pairsPlayed.get(pairCandidate.getPlayerTwo()).size();
 
-                            int maxDistance = minimumMatches - playerOnePairs;
-                            if (maxDistance < minimumMatches - playerTwoPairs) {
-                                maxDistance = minimumMatches - playerTwoPairs;
-                            }
-
                             if (bestCandidate != null) {
-                                if (maxDistance < bestCandidateDistance) {
+                                if (playerTwoPairs + playerOnePairs < bestCandidateDistance) {
                                     bestCandidate = pairCandidate;
-                                    bestCandidateDistance = maxDistance;
+                                    bestCandidateDistance = playerTwoPairs + playerOnePairs;
                                 }
                             } else {
                                 bestCandidate = pairCandidate;
-                                bestCandidateDistance = maxDistance;
+                                bestCandidateDistance = playerTwoPairs + playerOnePairs;
                             }
                         }
                     }
                 }
 
-                if (bestCandidate != null &&
-                        !playersPlayedInSequence.contains(bestCandidate.getPlayerOne()) &&
-                        !playersPlayedInSequence.contains(bestCandidate.getPlayerTwo())) {
+                if (noVeryNiceCandidates
+                        && playersPlayedInSequence.size() != sequenceLengthInPairs * 2
+                        && bestCandidate != null) {
                     addPair(playersPlayedInSequence, bestCandidate);
+                    Assert.assertFalse(!playersPlayedInSequence.contains(bestCandidate.getPlayerOne()) &&
+                            !playersPlayedInSequence.contains(bestCandidate.getPlayerTwo()));
+                } else if (allPossiblePairs.isEmpty()) {
+                    //No more pairs left at the end is a legal state.
+                    break outerwhile;
+                } else if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
+                    //Found legal sequence
+                    break sequenceloop;
                 } else {
-                    Assert.assertTrue("We were not able to find a candidate :(", false);
+//                    Assert.assertFalse("We were not able to find a candidate :(", noVeryNiceCandidates);
                 }
             }
 
-            if (playersPlayedInSequence.size() / 2 == sequenceLength) {
+            if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
                 foundSequence = true;
             }
         }
 
-
+        //Add one dummy game if there is an uneven amount of pairs.
+        if (currentTournament.size() % 2 == 1) {
+            currentTournament.add(new Pair(new Player("null"), new Player("null")));
+        }
     }
 
     public void addPair(List<Player> playersPlayedInSequence, Pair pairCandidate) {
@@ -144,11 +146,18 @@ public class SelectivePair {
     }
 
     public void movePlayersOneUp(Pair pairCandidate) {
-        playersAmountOfPairs.get(minimumMatches).remove(pairCandidate.getPlayerOne());
-        playersAmountOfPairs.get(minimumMatches).remove(pairCandidate.getPlayerTwo());
-        playersAmountOfPairs.putIfAbsent(minimumMatches + 1, new LinkedList<>());
-        playersAmountOfPairs.get(minimumMatches + 1).add(pairCandidate.getPlayerOne());
-        playersAmountOfPairs.get(minimumMatches + 1).add(pairCandidate.getPlayerTwo());
+        for (Integer integer : playersAmountOfPairs.keySet()) {
+            movePlayerOneUp(pairCandidate.getPlayerOne(), integer);
+            movePlayerOneUp(pairCandidate.getPlayerTwo(), integer);
+        }
+    }
+
+    public void movePlayerOneUp(Player player, Integer integer) {
+        if (playersAmountOfPairs.get(integer).contains(player)) {
+            playersAmountOfPairs.get(integer).remove(player);
+            playersAmountOfPairs.putIfAbsent(integer + 1, new HashSet<>());
+            playersAmountOfPairs.get(integer + 1).add(player);
+        }
     }
 
     public void initTournament() {
@@ -157,7 +166,7 @@ public class SelectivePair {
         this.originalPairs = tableSoccerTournament.generateAllLegalPairs();
         this.allPossiblePairs = new LinkedList<>(originalPairs);
 
-        playersAmountOfPairs.putIfAbsent(0, new LinkedList());
+        playersAmountOfPairs.putIfAbsent(0, new HashSet());
         for (Player player : players) {
             playersAmountOfPairs.get(0).add(player);
         }
