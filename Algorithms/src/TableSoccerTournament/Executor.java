@@ -36,16 +36,11 @@ public class Executor {
             return;
         }
 
-        if (sequenceLength != 1 && sequenceLength != 2 && sequenceLength != 3) {
-            System.out.println("Right now it only supports 1, 2 or 3 tables.");
-            return;
-        }
-
         if (args.length >= 3 && args[2] != null) {
 //            maxGames = Integer.valueOf(args[2]);
 //            result = TournamentGeneratorHelper.generateTournamentGameListBrute(amountOfPlayers, sequenceLength, maxGames);
 
-            System.out.println("Right now it only support a full turnament, not stopping in the middle.");
+            System.out.println("Right now it only support a full tournament, not stopping in the middle.");
 
 
         } else {

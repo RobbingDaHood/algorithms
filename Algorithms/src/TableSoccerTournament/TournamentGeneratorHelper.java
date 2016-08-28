@@ -356,7 +356,7 @@ public class TournamentGeneratorHelper {
     }
 
     public static boolean isDummyGame(Pair validPair, Pair pair) {
-        return validPair.getPlayerOne().equals(new Player("null")) ||
+        return validPair.isDummy() || pair.isDummy() || validPair.getPlayerOne().equals(new Player("null")) ||
                 pair.getPlayerOne().equals(new Player("null")) ||
                 validPair.getPlayerTwo().equals(new Player("null")) ||
                 pair.getPlayerTwo().equals(new Player("null"));
@@ -365,7 +365,7 @@ public class TournamentGeneratorHelper {
     public static boolean isNoGame(Pair validPair, Pair pair) {
 
         //They all need to be "NOT A GAME".
-        if (validPair.getPlayerOne().equals(new Player("NOT A GAME")) ||
+        if (validPair.isNotAGame() ||pair.isNotAGame() || validPair.getPlayerOne().equals(new Player("NOT A GAME")) ||
                 pair.getPlayerOne().equals(new Player("NOT A GAME")) ||
                 validPair.getPlayerTwo().equals(new Player("NOT A GAME")) ||
                 pair.getPlayerTwo().equals(new Player("NOT A GAME"))) {
@@ -375,7 +375,7 @@ public class TournamentGeneratorHelper {
                     !pair.getPlayerTwo().equals(new Player("NOT A GAME")));
         }
 
-        return validPair.getPlayerOne().equals(new Player("NOT A GAME")) ||
+        return validPair.isNotAGame() ||pair.isNotAGame() || validPair.getPlayerOne().equals(new Player("NOT A GAME")) ||
                 pair.getPlayerOne().equals(new Player("NOT A GAME")) ||
                 validPair.getPlayerTwo().equals(new Player("NOT A GAME")) ||
                 pair.getPlayerTwo().equals(new Player("NOT A GAME"));

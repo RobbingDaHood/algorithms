@@ -256,7 +256,7 @@ public class TableSoccerTournamentTest {
     public void getFullTournamentFeaturesMAX_2_SelectivePair() throws Exception {
         //Max plays: i * gamelength / 4
         for (int i = 4; i < 100; i++) {
-            int sequenceLengthInPairs = 6;
+            int sequenceLengthInPairs = 4;
             SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs);
             List<Pair> bestCandidate = selectivePair.getBestCandidate();
             List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
@@ -266,6 +266,75 @@ public class TableSoccerTournamentTest {
             testFillTournamnetFeatures(games, sequenceLengthInPairs / 2, false);
             System.out.println("");
         }
+    }
+
+    @org.junit.Test
+    public void getFullTournamentFeaturesCustom_2_SelectivePair() throws Exception {
+        //Max plays: i * gamelength / 4
+        for (int i = 4; i < 100; i++) {
+            int sequenceLengthInPairs = 2;
+            int maxPlaysPrPlayer = 3;
+            SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs, maxPlaysPrPlayer);
+            List<Pair> bestCandidate = selectivePair.getBestCandidate();
+            List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
+
+            System.out.println("Amount of players: " + i + " resulted in " + games.size() + "(" + (games.size() * 4 / (double) i) + ") Games. At sequence length " + sequenceLengthInPairs + " games.");
+
+            testFillTournamnetFeatures(games, sequenceLengthInPairs / 2, false, maxPlaysPrPlayer);
+            System.out.println("");
+        }
+    }
+
+    @org.junit.Test
+    public void getFullTournamentFeaturesTOTALNoLimit() throws Exception {
+        //Max plays: i * gamelength / 4
+        for (int i = 4; i < 100; i++) {
+            for (int sequenceLengthInPairs = 2; sequenceLengthInPairs <= 10 && sequenceLengthInPairs * 2 <= i; sequenceLengthInPairs += 2) {
+                    SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs);
+                    List<Pair> bestCandidate = selectivePair.getBestCandidate();
+                    List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
+
+                    System.out.println("Amount of players: " + i + " resulted in " + games.size() + "(" + (games.size() * 4 / (double) i) + ") Games. At sequence length " + sequenceLengthInPairs + " pairs.");
+
+                    testFillTournamnetFeatures(games, sequenceLengthInPairs / 2, false);
+                    System.out.println("");
+            }
+        }
+    }
+
+    @org.junit.Test
+    public void getFullTournamentFeaturesTOTAL() throws Exception {
+        //Max plays: i * gamelength / 4
+        for (int i = 4; i < 50; i++) {
+            for (int sequenceLengthInPairs = 2; sequenceLengthInPairs <= 10 && sequenceLengthInPairs * 2 <= i; sequenceLengthInPairs += 2) {
+                for (int maxPlaysPrPlayer = 1; maxPlaysPrPlayer <= i; maxPlaysPrPlayer++) {
+                    SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs, maxPlaysPrPlayer);
+                    List<Pair> bestCandidate = selectivePair.getBestCandidate();
+                    List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
+
+                    System.out.println("Amount of players: " + i + " resulted in " + games.size() + "(" + (games.size() * 4 / (double) i) + ") Games. At sequence length " + sequenceLengthInPairs + " games. Max amount of plays " + maxPlaysPrPlayer);
+
+                    testFillTournamnetFeatures(games, sequenceLengthInPairs / 2, false, maxPlaysPrPlayer);
+                    System.out.println("");
+                }
+            }
+        }
+    }
+
+    @org.junit.Test
+    public void getFullTournamentFeaturesTOTALCustom() throws Exception {
+        //Max plays: i * gamelength / 4
+        int i = 21;
+        int sequenceLengthInPairs = 4;
+        int maxPlaysPrPlayer = 17;
+        SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs, maxPlaysPrPlayer);
+        List<Pair> bestCandidate = selectivePair.getBestCandidate();
+        List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
+
+        System.out.println("Amount of players: " + i + " resulted in " + games.size() + "(" + (games.size() * 4 / (double) i) + ") Games. At sequence length " + sequenceLengthInPairs + " pairs. Max amount of plays " + maxPlaysPrPlayer);
+
+        testFillTournamnetFeatures(games, sequenceLengthInPairs / 2, false, maxPlaysPrPlayer);
+        System.out.println("");
     }
 
     @org.junit.Test
@@ -283,7 +352,12 @@ public class TableSoccerTournamentTest {
         System.out.println("");
     }
 
+
     private void testFillTournamnetFeatures(List<Game> games, int sequenceLength, boolean unsafe) {
+        testFillTournamnetFeatures(games, sequenceLength, unsafe, -1);
+    }
+
+    private void testFillTournamnetFeatures(List<Game> games, int sequenceLength, boolean unsafe, int maxPlaysPrPlayer) {
         if (games.isEmpty())
             return;
 
@@ -309,6 +383,19 @@ public class TableSoccerTournamentTest {
                 } else {
                     Assert.assertFalse(!TournamentGeneratorHelper.isValidGame(game.getTeamOne(), game.getTeamTwo()));
                     Assert.assertFalse(!TournamentGeneratorHelper.isNotSamePairs(game.getTeamOne(), game.getTeamTwo()));
+
+                    if (pairsPlayed.get(game.getTeamOne().getPlayerOne()) != null) {
+                        Assert.assertFalse(pairsPlayed.get(game.getTeamOne().getPlayerOne()).contains(game.getTeamOne().getPlayerTwo()));
+                    }
+                    if (pairsPlayed.get(game.getTeamOne().getPlayerTwo()) != null) {
+                        Assert.assertFalse(pairsPlayed.get(game.getTeamOne().getPlayerTwo()).contains(game.getTeamOne().getPlayerOne()));
+                    }
+                    if (pairsPlayed.get(game.getTeamTwo().getPlayerOne()) != null) {
+                        Assert.assertFalse(pairsPlayed.get(game.getTeamTwo().getPlayerOne()).contains(game.getTeamTwo().getPlayerTwo()));
+                    }
+                    if (pairsPlayed.get(game.getTeamTwo().getPlayerTwo()) != null) {
+                        Assert.assertFalse(pairsPlayed.get(game.getTeamTwo().getPlayerTwo()).contains(game.getTeamTwo().getPlayerOne()));
+                    }
 
                     TournamentGeneratorHelper.addTeam(pairsPlayed, game.getTeamOne().getPlayerOne(), game.getTeamOne().getPlayerTwo());
                     TournamentGeneratorHelper.addTeam(pairsPlayed, game.getTeamTwo().getPlayerOne(), game.getTeamTwo().getPlayerTwo());
@@ -368,6 +455,9 @@ public class TableSoccerTournamentTest {
         }
 
         Assert.assertFalse(maxAmountOfPlays != minAmountOfPlays);
+        if (maxPlaysPrPlayer != -1) {
+            Assert.assertFalse(maxPlaysPrPlayer < maxAmountOfPlays);
+        }
 
         if (dummyGames > 0)
             System.out.println("Dummies: " + dummyGames);
