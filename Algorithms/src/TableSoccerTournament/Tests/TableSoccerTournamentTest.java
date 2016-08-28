@@ -256,7 +256,7 @@ public class TableSoccerTournamentTest {
     public void getFullTournamentFeaturesMAX_2_SelectivePair() throws Exception {
         //Max plays: i * gamelength / 4
         for (int i = 4; i < 100; i++) {
-            int sequenceLengthInPairs = 4;
+            int sequenceLengthInPairs = 6;
             SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs);
             List<Pair> bestCandidate = selectivePair.getBestCandidate();
             List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
@@ -271,8 +271,8 @@ public class TableSoccerTournamentTest {
     @org.junit.Test
     public void getFullTournamentFeaturesMAX_2_SelectivePairCustom() throws Exception {
         //Max plays: i * gamelength / 4
-        int i = 15;
-        int sequenceLengthInPairs = 6;
+        int i = 10;
+        int sequenceLengthInPairs = 4;
         SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs);
         List<Pair> bestCandidate = selectivePair.getBestCandidate();
         List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
@@ -291,6 +291,7 @@ public class TableSoccerTournamentTest {
         Map<Double, Integer> distanceCount = new HashMap<>();
 
         int dummyGames = 0;
+        int noGames = 0;
 
         double maxGamesPlayedDistance = -Double.MAX_VALUE;
         int k = 0;
@@ -299,7 +300,13 @@ public class TableSoccerTournamentTest {
             for (k = 0; k < sequenceLength && i + k < games.size(); k++) {
                 Game game = games.get(i + k);
 
-                if (!TournamentGeneratorHelper.isDummyGame(game.getTeamOne(), game.getTeamTwo())) {
+                if (TournamentGeneratorHelper.isDummyGame(game.getTeamOne(), game.getTeamTwo())) {
+                    dummyGames++;
+                    TournamentGeneratorHelper.addTeam(pairsPlayed, game.getTeamOne().getPlayerOne(), game.getTeamOne().getPlayerTwo());
+                    TournamentGeneratorHelper.addTeam(pairsPlayed, game.getTeamTwo().getPlayerOne(), game.getTeamTwo().getPlayerTwo());
+                } else if (TournamentGeneratorHelper.isNoGame(game.getTeamOne(), game.getTeamTwo())) {
+                    noGames++;
+                } else {
                     Assert.assertFalse(!TournamentGeneratorHelper.isValidGame(game.getTeamOne(), game.getTeamTwo()));
                     Assert.assertFalse(!TournamentGeneratorHelper.isNotSamePairs(game.getTeamOne(), game.getTeamTwo()));
 
@@ -317,10 +324,6 @@ public class TableSoccerTournamentTest {
                     playersPlayedInSequence.add(game.getTeamOne().getPlayerTwo());
                     playersPlayedInSequence.add(game.getTeamTwo().getPlayerOne());
                     playersPlayedInSequence.add(game.getTeamTwo().getPlayerTwo());
-                } else {
-                    dummyGames++;
-                    TournamentGeneratorHelper.addTeam(pairsPlayed, game.getTeamOne().getPlayerOne(), game.getTeamOne().getPlayerTwo());
-                    TournamentGeneratorHelper.addTeam(pairsPlayed, game.getTeamTwo().getPlayerOne(), game.getTeamTwo().getPlayerTwo());
                 }
             }
 
@@ -328,7 +331,7 @@ public class TableSoccerTournamentTest {
             double minAmountOfPlays = Double.MAX_VALUE;
 
             for (Player player : pairsPlayed.keySet()) {
-                if (pairsPlayed.get(player) != null && !player.equals(new Player("null"))) {
+                if (pairsPlayed.get(player) != null && TournamentGeneratorHelper.isCompetingPlayer(player)) {
                     if (maxAmountOfPlays < pairsPlayed.get(player).size()) {
                         maxAmountOfPlays = pairsPlayed.get(player).size();
                     }
@@ -354,7 +357,7 @@ public class TableSoccerTournamentTest {
         double minAmountOfPlays = Double.MAX_VALUE;
 
         for (Player player : pairsPlayed.keySet()) {
-            if (pairsPlayed.get(player) != null && !player.equals(new Player("null"))) {
+            if (pairsPlayed.get(player) != null && TournamentGeneratorHelper.isCompetingPlayer(player)) {
                 if (maxAmountOfPlays < pairsPlayed.get(player).size()) {
                     maxAmountOfPlays = pairsPlayed.get(player).size();
                 }
@@ -368,13 +371,13 @@ public class TableSoccerTournamentTest {
 
         if (dummyGames > 0)
             System.out.println("Dummies: " + dummyGames);
-        else
-            System.out.println(" ");
+
+        if (noGames > 0)
+            System.out.println("NoGames: " + noGames);
 
         for (Double aDouble : distanceCount.keySet()) {
             System.out.println("Distance  " + aDouble + " count " + distanceCount.get(aDouble));
         }
-
     }
 
     //This test wont stop before all games have been executed

@@ -36,8 +36,8 @@ public class Executor {
             return;
         }
 
-        if (sequenceLength != 1 && sequenceLength != 2) {
-            System.out.println("Right now it only supports 1 or 2 tables.");
+        if (sequenceLength != 1 && sequenceLength != 2 && sequenceLength != 3) {
+            System.out.println("Right now it only supports 1, 2 or 3 tables.");
             return;
         }
 

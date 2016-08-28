@@ -53,6 +53,8 @@ public class SelectivePair {
             foundSequence = false;
 
             //need to create legal sequences.
+            //TODO THIS PART NEED FIXING
+            //Det handler om "//We rather want one session with fewer tables, than stopping early."
             if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
                 playersPlayedInSequence = new LinkedList<>();
             }
@@ -62,7 +64,7 @@ public class SelectivePair {
 
                 Pair bestCandidate = null;
                 int bestCandidateDistance = Integer.MAX_VALUE;
-                boolean noVeryNiceCandidates = true;
+                boolean thereWereVeryNiceCandidates = false;
                 for (Pair pairCandidate : new LinkedList<>(allPossiblePairs)) {
 
                     //This could happen because of "Very nice candidates"
@@ -83,7 +85,7 @@ public class SelectivePair {
                         if (playersAmountOfPairs.get(minimumMatches).contains(pairCandidate.getPlayerOne()) &&
                                 playersAmountOfPairs.get(minimumMatches).contains(pairCandidate.getPlayerTwo())) {
                             addPair(playersPlayedInSequence, pairCandidate);
-                            noVeryNiceCandidates = false;
+                            thereWereVeryNiceCandidates = true;
                         } else {
                             //Find best possible pair for this spot in the sequence
                             pairsPlayed.putIfAbsent(pairCandidate.getPlayerOne(), new LinkedList<>());
@@ -104,7 +106,7 @@ public class SelectivePair {
                     }
                 }
 
-                if (noVeryNiceCandidates
+                if (!thereWereVeryNiceCandidates
                         && playersPlayedInSequence.size() != sequenceLengthInPairs * 2
                         && bestCandidate != null) {
                     addPair(playersPlayedInSequence, bestCandidate);
@@ -116,12 +118,22 @@ public class SelectivePair {
                 } else if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
                     //Found legal sequence
                     break sequenceloop;
-                } else {
-//                    Assert.assertFalse("We were not able to find a candidate :(", noVeryNiceCandidates);
+                } else if (playersPlayedInSequence.size() > 0 && !thereWereVeryNiceCandidates) {
+                    if (currentTournament.size() % 2 == 1) {
+                        currentTournament.add(new Pair(new Player("null"), new Player("null")));
+                    }
+
+                    //We rather want one session with fewer tables, than stopping early.
+                    while (currentTournament.size() % sequenceLengthInPairs  != 0) {
+                        currentTournament.add(new Pair(new Player("NOT A GAME"), new Player("NOT A GAME")));
+                    }
+                    playersPlayedInSequence = new LinkedList<>();
+                    foundSequence = true;
+                    break sequenceloop;
                 }
             }
 
-            if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
+            if (playersPlayedInSequence.size() > 0 && currentTournament.size() % sequenceLengthInPairs == 0) {
                 foundSequence = true;
             }
         }

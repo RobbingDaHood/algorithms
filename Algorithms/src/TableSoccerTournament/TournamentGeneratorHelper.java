@@ -362,6 +362,25 @@ public class TournamentGeneratorHelper {
                 pair.getPlayerTwo().equals(new Player("null"));
     }
 
+    public static boolean isNoGame(Pair validPair, Pair pair) {
+
+        //They all need to be "NOT A GAME".
+        if (validPair.getPlayerOne().equals(new Player("NOT A GAME")) ||
+                pair.getPlayerOne().equals(new Player("NOT A GAME")) ||
+                validPair.getPlayerTwo().equals(new Player("NOT A GAME")) ||
+                pair.getPlayerTwo().equals(new Player("NOT A GAME"))) {
+            Assert.assertFalse(!validPair.getPlayerOne().equals(new Player("NOT A GAME")) ||
+                    !pair.getPlayerOne().equals(new Player("NOT A GAME")) ||
+                    !validPair.getPlayerTwo().equals(new Player("NOT A GAME")) ||
+                    !pair.getPlayerTwo().equals(new Player("NOT A GAME")));
+        }
+
+        return validPair.getPlayerOne().equals(new Player("NOT A GAME")) ||
+                pair.getPlayerOne().equals(new Player("NOT A GAME")) ||
+                validPair.getPlayerTwo().equals(new Player("NOT A GAME")) ||
+                pair.getPlayerTwo().equals(new Player("NOT A GAME"));
+    }
+
 
     private static void addGames(Map<Player, List<Player>> pairsPlayed, List<Game> games) {
         for (Game game : games) {
@@ -371,7 +390,7 @@ public class TournamentGeneratorHelper {
     }
 
     public static void addTeam(Map<Player, List<Player>> pairsPlayed, Player playerOne, Player playerTwo) {
-       if (!playerOne.equals(new Player("null"))) {
+       if (isCompetingPlayer(playerOne)) {
            if (pairsPlayed.get(playerOne) == null) {
                LinkedList<Player> players = new LinkedList<>();
                players.add(playerTwo);
@@ -381,7 +400,7 @@ public class TournamentGeneratorHelper {
            }
        }
 
-        if (!playerTwo.equals(new Player("null"))) {
+        if (isCompetingPlayer(playerTwo)) {
             if (pairsPlayed.get(playerTwo) == null) {
                 LinkedList<Player> players = new LinkedList<>();
                 players.add(playerOne);
@@ -390,6 +409,11 @@ public class TournamentGeneratorHelper {
                 pairsPlayed.get(playerTwo).add(playerOne);
             }
         }
+    }
+
+
+    public static boolean isCompetingPlayer(Player player) {
+        return !player.equals(new Player("null"));
     }
 
     public static LinkedList<Pair> modifyTorunamentForSequenceLength(LinkedList<Pair> allPairs, int sequencePairLength, boolean unsafe) {
@@ -525,15 +549,15 @@ public class TournamentGeneratorHelper {
 
                 stringBuffer.append("{");
 
-                stringBuffer.append("\"kampnr\":" + gameNumber++ + ",\"par1\":{\"spiller1\":");
+                stringBuffer.append("\"kampnr\":" + gameNumber++ + ",\"par1\":{\"spiller1\":\"");
                 stringBuffer.append(game.getTeamOne().getPlayerOne());
-                stringBuffer.append(",\"spiller2\":");
+                stringBuffer.append("\",\"spiller2\":\"");
                 stringBuffer.append(game.getTeamOne().getPlayerTwo());
-                stringBuffer.append("},\"par2\":{\"spiller1\":");
+                stringBuffer.append("\"},\"par2\":{\"spiller1\":\"");
                 stringBuffer.append(game.getTeamTwo().getPlayerOne());
-                stringBuffer.append(",\"spiller2\":");
+                stringBuffer.append("\",\"spiller2\":\"");
                 stringBuffer.append(game.getTeamTwo().getPlayerTwo());
-                stringBuffer.append("}");
+                stringBuffer.append("\"}");
 
                 stringBuffer.append("}");
             }
