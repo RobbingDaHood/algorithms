@@ -1,6 +1,12 @@
 package TableSoccerTournament;
 
 
+import TableSoccerTournament.Models.Game;
+import TableSoccerTournament.Models.Pair;
+
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Created by super on 15/08/2016.
  */
@@ -9,7 +15,7 @@ public class Executor {
         int amountOfPlayers = 0;
         int sequenceLength = 0;
         int maxGames = 0;
-        String result;
+        String result = "";
 
         if (args.length < 2) {
             printError();
@@ -30,11 +36,23 @@ public class Executor {
             return;
         }
 
-        if (args.length > 1 && args[2] != null) {
-            maxGames = Integer.valueOf(args[2]);
-            result = TournamentGeneratorHelper.generateTournamentGameListBrute(amountOfPlayers, sequenceLength, maxGames);
+        if (sequenceLength != 1 && sequenceLength != 2) {
+            System.out.println("Right now it only supports 1 or 2 tables.");
+            return;
+        }
+
+        if (args.length >= 3 && args[2] != null) {
+//            maxGames = Integer.valueOf(args[2]);
+//            result = TournamentGeneratorHelper.generateTournamentGameListBrute(amountOfPlayers, sequenceLength, maxGames);
+
+            System.out.println("Right now it only support a full turnament, not stopping in the middle.");
+
+
         } else {
-            result = TournamentGeneratorHelper.generateTournamentGameListBrute(amountOfPlayers, sequenceLength, Integer.MAX_VALUE);
+            SelectivePair selectivePair = new SelectivePair(amountOfPlayers, sequenceLength * 2);
+            List<Pair> bestCandidate = selectivePair.getBestCandidate();
+            List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
+            result = TournamentGeneratorHelper.generateJson(games, sequenceLength);
         }
 
         System.out.println(result);
