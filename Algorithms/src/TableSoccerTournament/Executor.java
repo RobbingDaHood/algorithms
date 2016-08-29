@@ -37,12 +37,11 @@ public class Executor {
         }
 
         if (args.length >= 3 && args[2] != null) {
-//            maxGames = Integer.valueOf(args[2]);
-//            result = TournamentGeneratorHelper.generateTournamentGameListBrute(amountOfPlayers, sequenceLength, maxGames);
-
-            System.out.println("Right now it only support a full tournament, not stopping in the middle.");
-
-
+            maxGames = Integer.valueOf(args[2]);
+            SelectivePair selectivePair = new SelectivePair(amountOfPlayers, sequenceLength * 2, maxGames);
+            List<Pair> bestCandidate = selectivePair.getBestCandidate();
+            List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
+            result = TournamentGeneratorHelper.generateJson(games, sequenceLength);
         } else {
             SelectivePair selectivePair = new SelectivePair(amountOfPlayers, sequenceLength * 2);
             List<Pair> bestCandidate = selectivePair.getBestCandidate();

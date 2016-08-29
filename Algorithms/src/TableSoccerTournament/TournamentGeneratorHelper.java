@@ -549,7 +549,14 @@ public class TournamentGeneratorHelper {
 
                 stringBuffer.append("{");
 
-                stringBuffer.append("\"kampnr\":" + gameNumber++ + ",\"par1\":{\"spiller1\":\"");
+                String type = "Normal";
+                if (game.getTeamOne().isDummy() || game.getTeamTwo().isDummy()) {
+                    type = "Dummy";
+                } else if (game.getTeamOne().isNotAGame() || game.getTeamTwo().isNotAGame()) {
+                    type = "NotAGame";
+                }
+
+                stringBuffer.append("\"kampnr\":" + gameNumber++ + ", \"type\":\"" + type + "\", \"par1\":{\"spiller1\":\"");
                 stringBuffer.append(game.getTeamOne().getPlayerOne());
                 stringBuffer.append("\",\"spiller2\":\"");
                 stringBuffer.append(game.getTeamOne().getPlayerTwo());
