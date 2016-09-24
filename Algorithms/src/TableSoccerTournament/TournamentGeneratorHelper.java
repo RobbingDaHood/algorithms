@@ -390,15 +390,15 @@ public class TournamentGeneratorHelper {
     }
 
     public static void addTeam(Map<Player, List<Player>> pairsPlayed, Player playerOne, Player playerTwo) {
-       if (isCompetingPlayer(playerOne)) {
-           if (pairsPlayed.get(playerOne) == null) {
-               LinkedList<Player> players = new LinkedList<>();
-               players.add(playerTwo);
-               pairsPlayed.put(playerOne, players);
-           } else {
-               pairsPlayed.get(playerOne).add(playerTwo);
-           }
-       }
+        if (isCompetingPlayer(playerOne)) {
+            if (pairsPlayed.get(playerOne) == null) {
+                LinkedList<Player> players = new LinkedList<>();
+                players.add(playerTwo);
+                pairsPlayed.put(playerOne, players);
+            } else {
+                pairsPlayed.get(playerOne).add(playerTwo);
+            }
+        }
 
         if (isCompetingPlayer(playerTwo)) {
             if (pairsPlayed.get(playerTwo) == null) {
@@ -408,6 +408,16 @@ public class TournamentGeneratorHelper {
             } else {
                 pairsPlayed.get(playerTwo).add(playerOne);
             }
+        }
+    }
+
+    public static void removeTeam(Map<Player, List<Player>> pairsPlayed, Player playerOne, Player playerTwo) {
+        if (isCompetingPlayer(playerOne)) {
+            pairsPlayed.get(playerOne).remove(playerTwo);
+        }
+
+        if (isCompetingPlayer(playerTwo)) {
+            pairsPlayed.get(playerTwo).remove(playerOne);
         }
     }
 

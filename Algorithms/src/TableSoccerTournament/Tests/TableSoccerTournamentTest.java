@@ -306,13 +306,13 @@ public class TableSoccerTournamentTest {
     public void getFullTournamentFeaturesTOTAL() throws Exception {
         //Max plays: i * gamelength / 4
         for (int i = 4; i < 50; i++) {
-            for (int sequenceLengthInPairs = 2; sequenceLengthInPairs <= 10 && sequenceLengthInPairs * 2 <= i; sequenceLengthInPairs += 2) {
+            for (int sequenceLengthInPairs = 2; sequenceLengthInPairs <= 4 && sequenceLengthInPairs * 2 <= i; sequenceLengthInPairs += 2) {
                 for (int maxPlaysPrPlayer = 1; maxPlaysPrPlayer <= i; maxPlaysPrPlayer++) {
                     SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs, maxPlaysPrPlayer);
                     List<Pair> bestCandidate = selectivePair.getBestCandidate();
                     List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
 
-                    System.out.println("Amount of players: " + i + " resulted in " + games.size() + "(" + (games.size() * 4 / (double) i) + ") Games. At sequence length " + sequenceLengthInPairs + " games. Max amount of plays " + maxPlaysPrPlayer);
+                    System.out.println("Amount of players: " + i + " resulted in " + games.size() + "(" + (games.size() * 4 / (double) i) + ") Games. At sequence length " + sequenceLengthInPairs + " pairs. Max amount of plays " + maxPlaysPrPlayer);
 
                     testFillTournamnetFeatures(games, sequenceLengthInPairs / 2, false, maxPlaysPrPlayer);
                     System.out.println("");
@@ -324,9 +324,9 @@ public class TableSoccerTournamentTest {
     @org.junit.Test
     public void getFullTournamentFeaturesTOTALCustom() throws Exception {
         //Max plays: i * gamelength / 4
-        int i = 21;
+        int i = 9;
         int sequenceLengthInPairs = 4;
-        int maxPlaysPrPlayer = 17;
+        int maxPlaysPrPlayer = 4;
         SelectivePair selectivePair = new SelectivePair(i, sequenceLengthInPairs, maxPlaysPrPlayer);
         List<Pair> bestCandidate = selectivePair.getBestCandidate();
         List<Game> games = TournamentGeneratorHelper.generateGameList(new LinkedList<>(bestCandidate));
@@ -458,6 +458,8 @@ public class TableSoccerTournamentTest {
         if (maxPlaysPrPlayer != -1) {
             Assert.assertFalse(maxPlaysPrPlayer < maxAmountOfPlays);
         }
+
+        Assert.assertFalse("NoGames " + noGames, noGames > 2);
 
         if (dummyGames > 0)
             System.out.println("Dummies: " + dummyGames);
