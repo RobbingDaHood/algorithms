@@ -58,7 +58,6 @@ public class SelectivePair {
             return;
         }
 
-        boolean thereWereCandidatesWithMaxAmountOfPlays = false;
         boolean foundSequence = true;
         playersPlayedInSequence = new LinkedList<>();
         nextSequenceWhile:
@@ -87,7 +86,6 @@ public class SelectivePair {
 
                     if (playersAmountOfPairs.get(maxAmountOfBattlesPrPlayer).contains(pairCandidate.getPlayerOne()) ||
                             playersAmountOfPairs.get(maxAmountOfBattlesPrPlayer).contains(pairCandidate.getPlayerTwo())) {
-                        thereWereCandidatesWithMaxAmountOfPlays = true;
                         continue;
                     }
 
@@ -143,78 +141,75 @@ public class SelectivePair {
             }
         }
 
-        finishTheTournament(thereWereCandidatesWithMaxAmountOfPlays);
+        finishTheTournament();
     }
 
-    public void finishTheTournament(boolean thereWereCandidatesWithMaxAmountOfPlays) {
+    public void finishTheTournament() {
+        LinkedList<Player> playersMissingOneBattle = getPlayersMissingABattle();
 
-//        if (thereWereCandidatesWithMaxAmountOfPlays) {
-            LinkedList<Player> playersMissingOneBattle = getPlayersMissingABattle();
+        while (playersMissingOneBattle.size() > 0 && allPossiblePairs.size() > 0) {
+            boolean addedAnything = addLegalPairsFinishTheTournament();
 
-            while (playersMissingOneBattle.size() > 0 && allPossiblePairs.size() > 0) {
-                boolean addedAnything = addLegalPairsFinishTheTournament();
-
-                if (addedAnything && currentTournament.size() % sequenceLengthInPairs == 0) { //If we have a legal sequnce
-                    continue;
-                }
-
-                playersMissingOneBattle = getPlayersMissingABattle();
-
-                if (playersMissingOneBattle.size() == 1) {
-                    if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(0))) {
-                        Pair dummyPair = new Pair(playersMissingOneBattle.get(0), new Player("null"), Pair.Type.DUMMY);
-                        addPair(dummyPair);
-                    }
-                } else if (playersMissingOneBattle.size() == 2) {
-                    if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(0)) &&
-                            !playersPlayedInSequence.contains(playersMissingOneBattle.get(1))) {
-                        //This way I am sure not to create a illegal pair.
-                        Pair dummyPair = new Pair(playersMissingOneBattle.get(0), new Player("null"), Pair.Type.DUMMY);
-                        addPair(dummyPair);
-                        dummyPair = new Pair(playersMissingOneBattle.get(1), new Player("null"), Pair.Type.DUMMY);
-                        addPair(dummyPair);
-                    }
-                } else if (playersMissingOneBattle.size() == 3) {
-                    if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(0)) &&
-                            !playersPlayedInSequence.contains(playersMissingOneBattle.get(1)) &&
-                            !playersPlayedInSequence.contains(playersMissingOneBattle.get(2))) {
-                        //I Accept that one of these pairs are illegal
-                        Pair dummyPair = new Pair(playersMissingOneBattle.get(0), playersMissingOneBattle.get(2), Pair.Type.DUMMY);
-                        addPair(dummyPair);
-                        dummyPair = new Pair(playersMissingOneBattle.get(1), new Player("null"), Pair.Type.DUMMY);
-                        addPair(dummyPair);
-                    }
-                } else if (playersMissingOneBattle.size() >= 4) {
-                    if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(0)) &&
-                            !playersPlayedInSequence.contains(playersMissingOneBattle.get(1))) {
-                        //I Accept that one of these pairs are illegal
-                        Player playerOne = playersMissingOneBattle.get(0);
-                        Player playerTwo = playersMissingOneBattle.get(1);
-                        Pair dummyPair = new Pair(playerOne, playerTwo, Pair.Type.DUMMY);
-                        addPair(dummyPair);
-
-                        if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
-                            playersPlayedInSequence = new LinkedList<>();
-                        }
-                    }
-
-                    if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(2)) &&
-                            !playersPlayedInSequence.contains(playersMissingOneBattle.get(3))) {
-                        //I Accept that one of these pairs are illegal
-                        Player playerOne = playersMissingOneBattle.get(2);
-                        Player playerTwo = playersMissingOneBattle.get(3);
-                        Pair dummyPair = new Pair(playerOne, playerTwo, Pair.Type.DUMMY);
-                        addPair(dummyPair);
-
-                        if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
-                            playersPlayedInSequence = new LinkedList<>();
-                        }
-                    }
-                }
-
-                playersMissingOneBattle = getPlayersMissingABattle();
+            if (addedAnything && currentTournament.size() % sequenceLengthInPairs == 0) { //If we have a legal sequnce
+                continue;
             }
-//        }
+
+            playersMissingOneBattle = getPlayersMissingABattle();
+
+            if (playersMissingOneBattle.size() == 1) {
+                if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(0))) {
+                    Pair dummyPair = new Pair(playersMissingOneBattle.get(0), new Player("null"), Pair.Type.DUMMY);
+                    addPair(dummyPair);
+                }
+            } else if (playersMissingOneBattle.size() == 2) {
+                if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(0)) &&
+                        !playersPlayedInSequence.contains(playersMissingOneBattle.get(1))) {
+                    //This way I am sure not to create a illegal pair.
+                    Pair dummyPair = new Pair(playersMissingOneBattle.get(0), new Player("null"), Pair.Type.DUMMY);
+                    addPair(dummyPair);
+                    dummyPair = new Pair(playersMissingOneBattle.get(1), new Player("null"), Pair.Type.DUMMY);
+                    addPair(dummyPair);
+                }
+            } else if (playersMissingOneBattle.size() == 3) {
+                if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(0)) &&
+                        !playersPlayedInSequence.contains(playersMissingOneBattle.get(1)) &&
+                        !playersPlayedInSequence.contains(playersMissingOneBattle.get(2))) {
+                    //I Accept that one of these pairs are illegal
+                    Pair dummyPair = new Pair(playersMissingOneBattle.get(0), playersMissingOneBattle.get(2), Pair.Type.DUMMY);
+                    addPair(dummyPair);
+                    dummyPair = new Pair(playersMissingOneBattle.get(1), new Player("null"), Pair.Type.DUMMY);
+                    addPair(dummyPair);
+                }
+            } else if (playersMissingOneBattle.size() >= 4) {
+                if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(0)) &&
+                        !playersPlayedInSequence.contains(playersMissingOneBattle.get(1))) {
+                    //I Accept that one of these pairs are illegal
+                    Player playerOne = playersMissingOneBattle.get(0);
+                    Player playerTwo = playersMissingOneBattle.get(1);
+                    Pair dummyPair = new Pair(playerOne, playerTwo, Pair.Type.DUMMY);
+                    addPair(dummyPair);
+
+                    if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
+                        playersPlayedInSequence = new LinkedList<>();
+                    }
+                }
+
+                if (!playersPlayedInSequence.contains(playersMissingOneBattle.get(2)) &&
+                        !playersPlayedInSequence.contains(playersMissingOneBattle.get(3))) {
+                    //I Accept that one of these pairs are illegal
+                    Player playerOne = playersMissingOneBattle.get(2);
+                    Player playerTwo = playersMissingOneBattle.get(3);
+                    Pair dummyPair = new Pair(playerOne, playerTwo, Pair.Type.DUMMY);
+                    addPair(dummyPair);
+
+                    if (playersPlayedInSequence.size() == sequenceLengthInPairs * 2) {
+                        playersPlayedInSequence = new LinkedList<>();
+                    }
+                }
+            }
+
+            playersMissingOneBattle = getPlayersMissingABattle();
+        }
 
         //Add one dummy game if there is an uneven amount of pairs.
         if (currentTournament.size() % 2 == 1) {
